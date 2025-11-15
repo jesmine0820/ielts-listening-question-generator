@@ -1,0 +1,237 @@
+Section,QuestionType,Questions_JSON,Diagram_URL
+Section 1,Table Completion,"```json
+{
+  ""Questions"": [
+    ""1. Main Library location: Opposite the ____________"",
+    ""2. Main Library notes: Closed on official public ____________"",
+    ""3. Sports Centre key feature: An Olympic-sized ____________ pool"",
+    ""4. Student Union key feature/purpose: The main ____________"",
+    ""5. Student Union opening hours: Until ____________ PM (weekdays)"",
+    ""6. Health Centre notes: Appointments must be made ____________"",
+    ""7. Engineering Department location: ____________ Hall""
+  ],
+  ""Answers"": [
+    ""clock tower"",
+    ""holidays"",
+    ""swimming"",
+    ""common room"",
+    ""11"",
+    ""online"",
+    ""Newton""
+  ],
+  ""Transcript"": ""{\n  \""sections\"": [\n    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""Hi Tom, welcome to the university! I'm Sarah, and I'll be your guide for today's campus tour. Are you ready to explore?\""\n    },\n    {\n      \""speaker\"": \""Tom\"",\n      \""text\"": \""Hi Sarah, yes, I'm really excited to see everything! Thanks for doing this.\""\n    },\n    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""No problem at all! Let's start right here, near the main reception building. We'll follow a route that covers some of the most important facilities you'll be using.\""\n    },\n    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""First up, as you can see just across the green, is our magnificent Main Library. It’s truly the academic heart of the campus. It's a huge building, with five floors of resources, study spaces, and computer labs.\""\n    },\n    {\n      \""speaker\"": \""Tom\"",\n      \""text\"": \""Wow, it looks really impressive! What's that tall building next to it?\""\n    },\
+    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""Ah, that's the university's famous Bell Tower, a real landmark. But the library itself is actually situated directly opposite the historic **clock tower**, which you can see perfectly from here. It's a great spot.\""\n    },\
+    {\n      \""speaker\"": \""Tom\"",\n      \""text\"": \""Right, I see it now. And are the opening hours pretty flexible?\""\n    },\
+    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""Absolutely. During term time, it's actually open 24 hours a day, seven days a week, which is incredibly popular with students, especially during exam periods. However, it does close completely on official public **holidays** to give staff a break. So just bear that in mind.\""\n    },\
+    {\n      \""speaker\"": \""Tom\"",\n      \""text\"": \""Good to know. That 24/7 access sounds like a lifesaver!\""\n    },\
+    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""It really is! Now, if you follow me this way, we're heading towards the west side of the campus. Over here, past the student residences, we have our state-of-the-art Sports Centre. It's incredibly popular.\""\n    },\
+    {\n      \""speaker\"": \""Tom\"",\n      \""text\"": \""Oh, great! I'm pretty keen on sports, so I'm looking forward to seeing this.\""\n    },\
+    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""You won't be disappointed! Inside, we have a fully-equipped gym with all the latest fitness machines, a large multi-purpose sports hall for basketball and badminton, and a fantastic indoor, heated **swimming** pool. It’s an Olympic-sized pool, actually, used for both recreational swimming and competitive training.\""\n    },\
+    {\n      \""speaker\"": \""Tom\"",\n      \""text\"": \""An Olympic-sized pool? That's amazing! Do I need to book to use it?\""\n    },\
+    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""For general swimming, no, you just need to show your student ID at reception. For specific classes or lane training, booking might be required. We also have a climbing wall, which is really popular too.\""\n    },\
+    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""Okay, our next stop is somewhere you'll definitely get to know well: the Student Union building. We call it the Maxwell Building. It's located on the ground floor.\""\n    },\
+    {\n      \""speaker\"": \""Tom\"",\n      \""text\"": \""What kind of things go on there?\""\n    },\
+    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""Well, it's the social hub of the university! On the ground floor, you'll find a lively café serving drinks and snacks, plenty of informal study spaces, and most importantly, the main **common room**. This is where students relax, chat, and often watch live sports or movies on the big screen.\""\n    },\
+    {\n      \""speaker\"": \""Tom\"",\n      \""text\"": \""Sounds like a good place to meet people.\""\n    },\
+    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""Definitely. The Student Union also hosts weekly events, from quiz nights to open mic sessions. As for opening hours, the main building is usually accessible until **11** PM on weekdays, and a little earlier on weekends, around 9 PM. The café usually closes an hour before the main building.\""\n    },\
+    {\n      \""speaker\"": \""Tom\"",\n      \""text\"": \""So, plenty of time to hang out after classes.\""\n    },\
+    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""Exactly! Let's move on. If you look over there, close to the North Gate entrance, you'll see the University Health Centre.\""\n    },\
+    {\n      \""speaker\"": \""Tom\"",\n      \""text\"": \""Is that where we go if we get sick?\""\n    },\
+    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""Yes, exactly. It offers a comprehensive range of health services, including general practitioner appointments, nursing services, and even mental health counseling. To manage demand, all appointments need to be booked **online** through the university portal. It's very efficient.\""\n    },\
+    {\n      \""speaker\"": \""Tom\"",\n      \""text\"": \""Okay, so no just walking in then.\""\n    },\
+    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""That's right. And it's only open on weekdays, from 9 AM to 5 PM, so for emergencies outside those hours, you'd need to go to the local hospital.\""\n    },\
+    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""Finally, just a quick look at one of our academic buildings. This impressive structure here is the Engineering Department. It's housed in the state-of-the-art **Newton** Hall.\""\n    },\
+    {\n      \""speaker\"": \""Tom\"",\n      \""text\"": \""That looks really modern.\""\n    },\
+    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""It is. It features cutting-edge laboratories, workshops, and computer-aided design suites. It's a fantastic facility, though access to the specialized labs is restricted to engineering students for safety and security reasons. It's generally open from 8 AM to 7 PM.\""\n    },\
+    {\n      \""speaker\"": \""Tom\"",\n      \""text\"": \""Thanks, Sarah. This has been a really useful tour. I feel much more familiar with the campus now.\""\n    },\
+    {\n      \""speaker\"": \""Sarah\"",\n      \""text\"": \""You're very welcome, Tom! I hope you have a fantastic time here at the university. If you have any more questions, just ask.\""\n    }\n  ]\n}"",
+  ""Diagram"": ""## Complete the table below.\nWrite ONE WORD AND / OR A NUMBER for each answer.\n\n| Facility            | Location/Building           | Key Feature/Purpose       | Notes/Restrictions        | Opening Hours       |\n| :------------------ | :-------------------------- | :------------------------ | :------------------------ | :------------------ |\n| Main Library        | Opposite **1** ____________ | Extensive research support | Closed on **2** ____________ | 24/7 during term    |\n| Sports Centre       | West side, near Residences  | **3** ____________ pool, climbing wall | Must show student ID      | From 6 AM (weekdays)|\n| Student Union       | Ground Floor, Maxwell Bldg  | **4** ____________, café, study spaces | Hosts weekly events       | Until **5** ____________ PM|\n| Health Centre       | Next to North Gate          | Appointments **6** ____________ | Requires advance booking  | Weekdays only       |\n| Engineering Dept    | **7** ____________ Hall     | State-of-the-art labs     | Access restricted to students | 8 AM - 7 PM         |""
+}
+```",
+Section 1,Form Completion,"```json
+{
+  ""Questions"": [
+    {
+      ""id"": 1,
+      ""text"": ""Intended Program: _________""
+    },
+    {
+      ""id"": 2,
+      ""text"": ""Next Information Session Date: _________""
+    },
+    {
+      ""id"": 3,
+      ""text"": ""Next Tour Meeting Location: The _________""
+    },
+    {
+      ""id"": 4,
+      ""text"": ""Time of Next Tour: _________ p.m.""
+    },
+    {
+      ""id"": 5,
+      ""text"": ""Expected Group Size: _________ students""
+    },
+    {
+      ""id"": 6,
+      ""text"": ""Campus Guide for Next Tour: Mr. _________""
+    },
+    {
+      ""id"": 7,
+      ""text"": ""Contact Phone Number: _________""
+    }
+  ],
+  ""Answers"": [
+    {
+      ""id"": 1,
+      ""answer"": ""History""
+    },
+    {
+      ""id"": 2,
+      ""answer"": ""15 October""
+    },
+    {
+      ""id"": 3,
+      ""answer"": ""Library""
+    },
+    {
+      ""id"": 4,
+      ""answer"": ""2:30""
+    },
+    {
+      ""id"": 5,
+      ""answer"": ""12""
+    },
+    {
+      ""id"": 6,
+      ""answer"": ""Mark""
+    },
+    {
+      ""id"": 7,
+      ""answer"": ""07700900123""
+    }
+  ],
+  ""Transcript"": ""*(The conversation begins with Mark, a campus guide, greeting Emily, a prospective student.)*\n\n**Mark:** Hello there, Emily! Welcome to our university campus tour. I'm Mark, and I'll be your guide today, showing you around and answering any questions you might have. It’s great to have you here.\n\n**Emily:** Hi Mark, thank you so much for doing this. I'm Emily White, and I'm really excited to see everything. I've heard wonderful things about this university.\n\n**Mark:** It's our pleasure, Emily. So, to start, have you had a chance to think about which program or field of study you might be interested in pursuing here? It often helps us tailor the tour a little.\n\n**Emily:** Yes, definitely. I'm very keen on **History**. I've always loved learning about the past, and your department has such a strong reputation, especially for its modern European history courses. I’ve read a lot about Professor Thompson’s work.\n\n**Mark:** That’s fantastic to hear! Our History department is indeed one of our key strengths, with excellent faculty and a really impressive archive collection. You’ll find a lot to engage with there. Now, today’s tour is a general overview, but we also run specific information sessions for each faculty, which go into much more detail about course structure, entry requirements, and so on. We actually had one for the Faculty of Arts, which includes History, just last week, on the 8th of October. However, the next one is scheduled for the **15th of October**. Would that be a date you could possibly attend?\n\n**Emily:** Oh, the 15th of October! That’s perfect. I think I can make that one. I'd love to learn more about the specific modules.\n\n**Mark:** Excellent. I can give you the details on how to register for that later. And if you decide you’d like to come back for another general campus tour, perhaps with family or friends, we hold them regularly. The next one is coming up this Saturday. For all our general tours, we always meet right at the main **Library** building entrance. It’s quite distinctive, easy to find, with those large glass panels at the front.\n\n**Emily:** Okay, the Library entrance. Got it. Is there a specific time for that Saturday tour?\n\n**Mark:** Yes, that particular tour kicks off at **2:30** p.m. We do have a morning slot at 10:00 a.m. too, but this one is in the afternoon, starting quite promptly at half-past two. It gives people time to travel in.\n\n**Emily:** 2:30 p.m., perfect. That works well for me.\n\n**Mark:** Great. Today's group is just you and a couple of others, which is lovely for a more personal experience. But for the Saturday tours, we usually have a slightly bigger cohort. We try to keep them manageable, so we generally cap them at about **12** students per guide. Sometimes we might stretch to 15 if demand is very high, but 12 is our usual average to ensure everyone can hear and ask questions comfortably.\n\n**Emily:** That sounds like a really good size, not too big that you get lost in the crowd.\n\n**Mark:** Exactly. We want everyone to feel they’ve had a comprehensive experience. And you know, if you do come back for the Saturday tour, you might even see a familiar face. For the afternoon tours on Saturdays, it's usually myself, **Mark** Johnson, who leads them. Occasionally, it's my colleague, Sarah, but I'm often scheduled for that particular slot.\n\n**Emily:** Oh, that would be great! So, I might see you again then. Well, I’m really looking forward to the rest of the tour.\n\n**Mark:** Me too, Emily. Before we continue on to the student union building, could I just quickly get a contact phone number for you? Just in case there are any changes to the information session or if we need to reach you for any reason.\n\n**Emily:** Of course. It’s **07700 900123**. That's my mobile number.\n\n**Mark:** Thank you. Let me just confirm that: zero-seven-seven-zero-zero, nine-zero-zero-one-two-three. Is that correct?\n\n**Emily:** Yes, that’s absolutely right.\n\n**Mark:** Fantastic. Right, if you look over here, to our left, that impressive building is the… *(fade out)*""
+}
+```",
+Section 2,Multiple Choice,"```json
+{
+  ""Questions"": [
+    {
+      ""id"": 1,
+      ""question_type"": ""T005 - Multiple Choice"",
+      ""question_text"": ""Which TWO facilities are located within the *newly renovated Student Hub*?"",
+      ""options"": {
+        ""A"": ""The main university library"",
+        ""B"": ""Career advisory services"",
+        ""C"": ""A dedicated study lounge"",
+        ""D"": ""Sports and recreation center"",
+        ""E"": ""International student support office""
+      },
+      ""choose_count"": 2
+    }
+  ],
+  ""Answers"": [
+    ""B"",
+    ""E""
+  ],
+  ""Transcript"": ""Mark: Alright Emily, welcome to the university campus tour! I'm Mark, your guide for today. We've got quite a bit to cover, and I'll try to give you a good overview of our main facilities.\n\nEmily: Hi Mark, thanks so much for doing this. I'm really excited to see everything. It's my first time on a campus this big!\n\nMark: No problem at all. We're currently standing near the main administration building, where you'd typically handle enrollment and tuition matters. It’s pretty central. But let’s keep moving; there’s much more to see. If you look straight ahead, you’ll see the clock tower – it's a bit of a landmark. And just beyond that, on the right, is the main university library. It’s a massive building, spanning four floors, with a huge collection of books, journals, and digital resources.\n\nEmily: Oh, that's good to know! Does it have a lot of individual study spaces too? I really need somewhere quiet to focus.\n\nMark: Absolutely. The library has numerous quiet zones and individual carrels, particularly on the upper floors. It also houses our multimedia lab and the IT support desk for student laptops and connectivity issues. So, it's a very busy hub of academic activity.\n\nMark: Okay Emily, and now, if we turn slightly to our left, you’ll see that really modern-looking glass building. That's the newly renovated Student Hub. It used to be just an older, smaller student union, but it's undergone a massive transformation over the past year, becoming a real central point for student life and support services. It's one of our proudest recent developments.\n\nEmily: Wow, it looks incredibly impressive! What exactly can I find inside? It looks like it could hold a lot.\n\nMark: Excellent question! It's been designed specifically to bring together a lot of essential services under one roof to make life easier for students. For instance, if you're looking for internships, part-time jobs, or career planning advice, the *Career Advisory Services* are now housed exclusively here, on the second floor. They run workshops, mock interviews, and even host employer networking events throughout the year. They're really proactive. Also, given our incredibly diverse student body, we've moved the *International Student Support Office* to the ground floor of the Hub. It's a much more welcoming and accessible space for new arrivals, and they handle everything from visa questions and accommodation advice to organising social events and cultural integration programs. So, definitely two key places to remember if you're an international student or just looking for your first job after graduation.\n\nEmily: That's incredibly convenient. So, no main library entrance here then, right? I thought I saw that on an older map.\n\nMark: Good observation, Emily. That's a common misconception now. The main library building is actually just behind us, as we saw earlier, and its primary entrance is on the north side, near the Clock Tower. No dedicated library services within the Hub itself anymore. And while there are plenty of open seating areas for casual study and socialising on the first floor, the more *dedicated, quiet study lounges* with the individual pods and specialized computer equipment are still located over in the Arts & Humanities building – which we'll be passing shortly, just beyond the central quad. Those are more for serious, focused work. And as for the *Sports and Recreation Center*, that's quite a distance away, on the far west side of campus, with its own dedicated complex for the gym, pools, and playing fields. So, remember, careers and international support are the big ones for the Student Hub.\n\nEmily: Okay, got it. Career services and international student support in the Hub. That clarifies things a lot. It sounds like a really useful place.\n\nMark: It absolutely is. We wanted to create a genuine one-stop-shop for student welfare and future planning. Shall we head towards the Arts and Humanities building next? We can then loop around past some of the departmental buildings.""
+}
+```",
+Section 2,Matching,"```json
+{
+  ""Questions"": [
+    {
+      ""question_number"": 21,
+      ""type"": ""matching"",
+      ""instruction"": ""Choose FIVE answers from the box and write the correct letter, A-G.\n\nWhich feature is mentioned for each of the following places?"",
+      ""list_items"": [
+        ""21 The Central Library"",
+        ""22 The Student Union Building"",
+        ""23 The Sports Complex"",
+        ""24 The Arts & Humanities Block"",
+        ""25 The Innovation Hub""
+      ],
+      ""options"": {
+        ""A"": ""Houses a popular café and social spaces."",
+        ""B"": ""Offers advanced research facilities."",
+        ""C"": ""Is open 24/7 during exam periods."",
+        ""D"": ""Primarily for postgraduate study."",
+        ""E"": ""Includes a climbing wall and an Olympic-sized pool."",
+        ""F"": ""Features a gallery for student exhibitions."",
+        ""G"": ""Provides support for startup businesses.""
+      }
+    }
+  ],
+  ""Answers"": [
+    {
+      ""question_number"": 21,
+      ""correct_answer"": ""C""
+    },
+    {
+      ""question_number"": 22,
+      ""correct_answer"": ""A""
+    },
+    {
+      ""question_number"": 23,
+      ""correct_answer"": ""E""
+    },
+    {
+      ""question_number"": 24,
+      ""correct_answer"": ""F""
+    },
+    {
+      ""question_number"": 25,
+      ""correct_answer"": ""G""
+    }
+  ],
+  ""Transcript"": ""SARAH: Welcome, Liam, to the Elmbrook University campus tour! I'm Sarah, your guide for today. We'll be covering some of our key facilities. Please feel free to ask questions as we go along.\n\nLIAM: Thanks, Sarah. I’m really excited to see everything. I’ve heard great things about Elmbrook.\n\nSARAH: Wonderful! Let's start right here. This impressive building to our left is **The Central Library**. It's the heart of our academic resources, housing over a million physical volumes and providing access to countless digital journals and databases. What really makes it stand out, especially for students, is its accessibility. During exam periods, typically from late May through June and again in December, the entire library operates on a **24/7 schedule**. Yes, it's open round the clock, ensuring students always have a quiet, well-equipped space to study. We also have various silent study zones, group work rooms you can book online, and a dedicated postgraduate research section on the top floor which offers advanced research facilities for our higher-degree students, but the 24/7 access is what most undergraduates appreciate most.\n\nLIAM: Wow, 24/7 access during exams sounds incredibly useful. My current college library closes at midnight.\n\nSARAH: Exactly! Moving on, if you look straight ahead, that modern glass and steel structure is **The Student Union Building**. This isn't just an administrative centre; it's the vibrant social hub of the campus. It **houses a very popular café on the ground floor, 'The Daily Grind', which is famous for its artisanal coffees and pastries.** Alongside the café, you'll find various social spaces, including comfortable lounges, pool tables, and even a small cinema that screens independent films and hosts student film festivals. It’s also where most student societies have their offices and where a lot of campus events, like freshers' week parties and charity fundraisers, take place. So, definitely a busy spot!\n\nLIAM: It looks like a great place to hang out between lectures.\n\nSARAH: It certainly is. Now, for those interested in health and fitness, let’s head this way towards **The Sports Complex**. This facility is truly state-of-the-art. It boasts an Olympic-sized swimming pool – yes, that’s 50 meters! – along with two full-sized sports halls suitable for basketball, badminton, and volleyball. We have multiple squash courts, a fully equipped gym with personal trainers available, and, something quite unique, **a fantastic climbing wall that caters to all skill levels, from beginners to advanced climbers.** There are also outdoor football pitches and tennis courts just behind it. Most of the facilities are free for registered students, with small charges for certain classes or equipment hire.\n\nLIAM: An Olympic pool and a climbing wall? That’s impressive! I didn’t expect that.\n\nSARAH: We try to offer a comprehensive experience! Next, we're approaching **The Arts & Humanities Block**. This is where creativity flourishes! It contains lecture theatres, seminar rooms, and dedicated studios for fine art, graphic design, and music production. One of its most distinctive features is on the ground floor: **a dedicated gallery space specifically for student exhibitions.** Throughout the year, you can see incredible works by our fine art, photography, and sculpture students. It’s a wonderful way to showcase their talent and get feedback from the university community and the public. There’s also a small theatre for student drama productions.\n\nLIAM: A student gallery sounds really cool. I enjoy art, so I’d definitely check that out.\n\nSARAH: You absolutely should. Finally, let's take a quick look at the building across the plaza – that's **The Innovation Hub**. This cutting-edge centre is all about fostering entrepreneurship and technological advancement. It’s a space designed to support students and alumni who have brilliant ideas and want to turn them into reality. **The Innovation Hub provides mentorship, access to venture capitalists, and co-working spaces specifically geared towards helping individuals and teams develop and launch their startup businesses.** We’ve had several successful companies originate from projects nurtured right here. It’s a fantastic resource for anyone with an entrepreneurial spirit.\n\nLIAM: So, if I had an idea for an app, I could get help here?\n\nSARAH: Precisely! They offer workshops and pitching events too. Well, Liam, that concludes the main part of our tour. Do you have any further questions before we head back to the admissions office?"",
+  ""Diagram"": """"
+}
+```",
+Section 3,Multiple Choice,"```json
+{
+  ""Questions"": [
+    {
+      ""id"": 1,
+      ""question_type"": ""T005 - Multiple Choice"",
+      ""question_text"": ""What TWO essential tasks does Mark advise Sarah to complete *immediately* after arriving on campus at the Student Welcome Centre?"",
+      ""options"": {
+        ""A"": ""Obtain her student identification card."",
+        ""B"": ""Collect her accommodation keys."",
+        ""C"": ""Finalize her course registration."",
+        ""D"": ""Attend the general orientation welcome talk."",
+        ""E"": ""Sign up for a sports club.""
+      }
+    }
+  ],
+  ""Answers"": [
+    ""A"",
+    ""C""
+  ],
+  ""Transcript"": ""Mark: Welcome to Brightwater University, Sarah! I’m Mark, your campus guide for today. Ready for the grand tour?\n\nSarah: Absolutely, Mark! Thanks for doing this. I'm really excited but a bit overwhelmed by the size of everything.\n\nMark: Perfectly normal! That’s why we do these tours. We’ll start here, right by the main gate, and our first crucial stop is the Student Welcome Centre, just across this plaza. It’s that modern glass building over there.\n\nSarah: Okay, good to know where to start.\n\nMark: Right. So, when you actually arrive on campus for your move-in day, this will be your absolute first port of call. Before you even think about unpacking or finding your room, you need to come here. This is where you’ll complete your initial course registration if you haven't finalised it online yet – it’s a quick check-in to confirm your modules and timetable. And, most importantly, you collect your student identification card here. You won't be able to access the library, labs, or even pick up your accommodation keys without it, so it's vital. Make sure you have your acceptance letter and some form of photo ID with you.\n\nSarah: So, registration and the ID card are the absolute top priorities?\n\nMark: Exactly. Once those are sorted, you can then pick up your official orientation pack, which will have your specific faculty welcome talk schedule and details about all the other introductory events. You'll also get directions to your residential hall and collect your room key from a separate desk here, but only after you’ve got your ID.\n\nSarah: Got it. That makes sense. What's next on the tour?\n\nMark: Next, we'll head over to the main library, the 'Knowledge Hub' as we call it. It's just a five-minute walk from here, past the clock tower. It’s open 24/7 during term time and has fantastic resources, quiet study zones, and group project rooms. You can book those online. They also offer workshops on academic writing and research skills.\n\nSarah: That sounds great. I'll probably spend a lot of time there.\n\nMark: Most students do! From the library, we’ll cut through the main quad to the Student Union building. That’s the real heart of campus social life. Downstairs, you’ve got the main dining hall, a café, and the campus shop. Upstairs are the offices for all the student societies – we have over 200, from chess club to drama society, environmental activism, and even a skydiving club! This is also where you'll find the Student Support Services, offering advice on everything from finance to wellbeing and careers.\n\nSarah: Wow, two hundred clubs! I was hoping to join a sports team.\n\nMark: Excellent! For sports clubs, you'll need to head to the Brightwater Sports Centre, which we'll visit next. It's about a ten-minute walk from the Student Union, on the far side of campus. It has an Olympic-sized swimming pool, a fully-equipped gym, squash courts, and several outdoor pitches. Try-outs for competitive teams usually happen in the first two weeks of term, and there are also plenty of recreational leagues and fitness classes you can join without needing to be super competitive. You can sign up for those at the Sports Centre reception.\n\nSarah: Perfect. I'll make sure to check that out. Is there anything else about initial steps I should know?\n\nMark: Well, once you've settled into your accommodation and attended your faculty's welcome talk, you'll want to explore your department's specific facilities. Most departments have their own common rooms, computer labs, and sometimes even small libraries. The general orientation will cover most of it, but don't hesitate to ask your department head or academic advisor for details. Also, make sure to activate your university email and check it regularly for important announcements. We'll be walking past the IT services building later, which can help with any tech issues.\n\nSarah: Okay, so, Student Welcome Centre first for ID and registration, then library, then Student Union, then Sports Centre. Got it. This has been really helpful, Mark. Thank you.\n\nMark: My pleasure, Sarah! We'll just finish up by walking past the main residential halls so you can get a feel for them. Any other questions so far?"",
+  ""Diagram"": """"
+}
+```",
+Section 4,Sentence Completion,"```json
+{
+  ""Questions"": [
+    ""1. The new *Quantum Library* is celebrated for its extensive collection and specialized ___________."",
+    ""2. Students seeking help with job applications and interview practice should visit the __________."",
+    ""3. According to Mark, the university places a strong emphasis on fostering a sense of ___________ among its students."",
+    ""4. First-year undergraduates are primarily housed in modern purpose-built __________."",
+    ""5. The *Innovation Hub* provides students with cutting-edge facilities to develop their projects, particularly in ___________."",
+    ""6. Sophie is advised to consider attending a ___________ for a more in-depth look at her chosen field."",
+    ""7. The Student Union organises a wide range of extracurricular activities and manages a popular __________.""
+  ],
+  ""Answers"": [
+    ""digital resources"",
+    ""Careers Service"",
+    ""community spirit"",
+    ""residential blocks"",
+    ""sustainable technology"",
+    ""departmental open day"",
+    ""student café""
+  ],
+  ""Transcript"": ""Mark: Welcome, Sophie, to the University of Westford! I'm Mark, one of our senior campus guides. Are you excited to see everything today?\nSophie: Absolutely, Mark! It's my first time visiting, and I'm really keen to get a feel for the place. I've heard so much about Westford.\nMark: Excellent! We're quite proud of our campus. We’ll start here at the main quadrangle, then move towards the academic buildings, explore some student facilities, and finally wrap up near the sports complex. Feel free to ask any questions as we go.\nSophie: Sounds perfect.\nMark: Alright, straight ahead, that impressive glass and steel structure is the *Quantum Library*. It's not just our central hub for learning; it's a testament to our commitment to cutting-edge research and accessible knowledge. It underwent a significant expansion three years ago.\nSophie: It looks massive! What are the main features of the new section?\nMark: Well, beyond the sheer increase in physical book capacity, the expansion focused heavily on enhancing our **digital resources**. We now have dedicated virtual reality labs for certain disciplines, an extensive e-journal database, and advanced multimedia suites. It's designed to cater to modern research methodologies, offering quiet study zones alongside collaborative spaces for group projects.\nSophie: That sounds really progressive. I'm studying computer science, so access to strong digital resources is crucial for me.\nMark: Absolutely. And you'll find subject-specific librarians who are experts in curating those resources for your field, ready to assist with complex research queries.\n\nMark: Let's head over towards the Guild Building. This is a real focal point for student support. On the ground floor, you'll find the **Careers Service**. They offer invaluable assistance, from helping students craft compelling CVs and cover letters to conducting mock interviews and connecting them with internships and graduate schemes. They also host regular career fairs with leading employers from various sectors, both national and international.\nSophie: That's a huge relief. I'm always worried about job prospects after university, especially in such a competitive market.\nMark: It’s a common concern, Sophie, but our Careers Service has an outstanding track record. They work tirelessly to ensure our graduates are well-prepared for the competitive job market, and they maintain strong, enduring links with industry partners, which often translates into excellent opportunities for our students even before they graduate.\n\nMark: Now, as we walk past the Student Union building, I want to touch on something I believe is truly unique about Westford: our inherent **community spirit**. While we are a large university, there's a palpable sense of belonging here. We actively foster an inclusive environment where students from diverse backgrounds feel genuinely welcome and supported. From the numerous student societies to the peer mentoring schemes and our dedicated welfare services, we really emphasize connectivity and mutual support. It's not just about academic excellence; it's about personal growth, holistic development, and creating lifelong connections. That's a philosophy we hold very dear and continually strive to strengthen.\nSophie: That sounds really welcoming. I'm hoping to find a place where I can make good friends and feel settled, rather than feeling lost in a big institution.\nMark: You absolutely will. We pride ourselves on that aspect, and it's something consistently highlighted in our student satisfaction surveys.\n\nMark: Moving on, if you look straight ahead, you'll see a cluster of modern buildings. These are some of our **residential blocks**. For first-year undergraduates, we guarantee accommodation, and most of it is purpose-built and situated right here on the main campus or very close by, typically just a five-minute walk from lectures. They're equipped with en-suite facilities and shared communal kitchens, offering a blend of privacy and social interaction. It's a great way to meet people and integrate into university life right from the start, forging those initial friendships.\nSophie: That’s good to know. I was wondering about accommodation options and how easy it would be to find a place.\nMark: We also have some postgraduate options and comprehensive private rented accommodation listings through the university portal for subsequent years, but the first year is all about making that transition as smooth and worry-free as possible.\n\nMark: Over to our left, this striking architectural marvel is the *Innovation Hub*. This facility is truly at the forefront of our research capabilities and entrepreneurial endeavours. It’s where interdisciplinary teams, often comprising both students and faculty, collaborate on groundbreaking projects. We’ve invested heavily in state-of-the-art labs, prototyping workshops, and dedicated incubator spaces here.\nSophie: What kind of projects are they working on? It looks incredibly advanced.\nMark: A vast array, but there’s a particular focus on **sustainable technology** and artificial intelligence applications, especially those with societal impact. For instance, there's a team currently developing smart urban farming solutions to address food security, and another working on advanced materials for renewable energy storage systems. It's designed to encourage entrepreneurial thinking and swiftly translate academic discoveries into tangible, real-world impact.\nSophie: That’s fascinating, especially the sustainable technology aspect. My computer science course touches on that, and I'm very interested in environmental issues.\nMark: Indeed, there are many opportunities for students across different faculties to get involved, even at undergraduate level, through research internships or specific project modules. It's a very dynamic environment.\n\nMark: We're now approaching the Computer Science Department building, your potential academic home! I won't take you inside today as it's a general campus tour, but I highly recommend you attend a **departmental open day** if you're serious about applying. These events offer a much more in-depth experience: you'll meet the professors, see the specific labs and computing facilities, and even sit in on a mini-lecture or participate in a workshop. It's the best way to truly understand the curriculum, the teaching philosophy, and the research culture within your chosen field.\nSophie: That’s a great idea. I’ll definitely look into that. It would be good to speak directly with some of the lecturers and current students.\nMark: Absolutely. And you can get a feel for the student experience within your particular department, which can be quite nuanced and different from the broader university atmosphere.\n\nMark: Let's make our way back towards the Student Union building, where we started. I want to highlight one more key aspect of student life. Besides housing the Careers Service and numerous administrative offices, the Student Union is the vibrant hub for all extracurricular activities. They manage over 200 clubs and societies – everything from academic societies like the robotics club to sports clubs, debate teams, and cultural groups. And right next to the main common room, you’ll find a very popular **student café**. It’s more than just a place to grab a coffee; it’s a vibrant social hub, perfect for casual meetings, quick study breaks, or just hanging out with friends between lectures in a relaxed atmosphere.\nSophie: That sounds like a great place to relax and meet new people, which is important when you're far from home.\nMark: It really is. It’s purposefully designed to be a comfortable, welcoming space, reflecting the inclusive ethos we strive for across the entire university community.\n\nMark: Well, Sophie, that concludes our main campus tour. I hope it's given you a comprehensive overview of what life at the University of Westford is like. Do you have any final questions for me or anything you'd like to revisit?\nSophie: No, Mark, thank you so much! It's been incredibly informative, and I feel much more confident about applying now. The digital resources in the library sound fantastic, and I'm definitely going to look into that departmental open day. I really appreciate your time.\nMark: My pleasure, Sophie. We hope to see you here next year!""
+}
+```",
