@@ -1,0 +1,11 @@
+pandas
+numpy
+scikit-learn
+firebase-admin
+pymupdf
+google-generativeai
+textstat
+json5
+coqui-tts
+Flask
+flask-cors

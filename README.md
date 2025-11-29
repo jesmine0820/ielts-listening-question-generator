@@ -8,10 +8,23 @@ This is my final year project which titled "IELTS Question Generator for Listeni
 * User can adjust and customize the theme and specifications.
 
 ## Technologies
-* Frontend -> HTML, CSS, ReactJS
+* Frontend -> HTML, CSS, JavaScript
 * Backend -> Flask API
 * Model -> Python
 * Deployment -> Render
 
 ## Training Set Resource
 * https://engexam.info/ielts-listening-practice-tests-printable/
+
+## Ways to Run
+1. Backend
+python -m venv venv 
+cd backend
+venv\Scripts\activate
+pip install -r requirements.txt
+python app.py
+
+2. Frontend
+cd frontend
+npm install
+npm start
