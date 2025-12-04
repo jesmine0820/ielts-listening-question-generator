@@ -1,41 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Create Account</title>
+    <meta charset="utf-8">
+    <title>Login</title>
     <link rel="stylesheet" href="../static/styles.css">
     <script type="module" src="../static/app.js"></script>
-    <!-- Font Awesome for Google & Facebook icons -->
+    <!-- Font for Google and Facebook icons-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
-    <div class="background">
-        <div class="shape"></div>
-        <div class="shape"></div>
-    </div>
+    <div class="background"></div>
 
-    <form id="signup-form">
-        <h3>Create Account</h3>
+    <!-- Floating red objects-->
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
 
-        <label for="email">Email</label>
-        <input type="email" placeholder="Email or Phone" id="email" required>
+    <!-- Subtle particle effects-->
+     <div class="particles" id="particles"></div>
 
-        <label for="password">Password</label>
-        <input type="password" placeholder="Password" id="password" required>
-
-        <button id="submit" type="submit">Create Account</button>
-
-        <div class="social">
-            <div class="google" id="google"><i class="fab fa-google"></i> Sign in with Google</div>
-            <div class="fb" id="fb"><i class="fab fa-facebook"></i> Sign in with Facebook</div>
-        </div>
-
-        <p class="form-text">
-            Already have an account? <span><a href="index.html">Login Here</a></span>
-        </p>
-    </form>
 </body>
-
 </html>
