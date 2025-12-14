@@ -3,8 +3,14 @@
 <head>
     <meta charset="utf-8">
     <title>Login</title>
-    <link rel="stylesheet" href="../static/styles.css">
-    <script type="module" src="../static/app.js"></script>
+    <!-- Styles -->
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/background.css">
+    <link rel="stylesheet" href="../static/css/login.css">
+    <!-- JavaScripts-->
+    <script type="module" src="../static/js/app.js"></script>
+    <script type="module" src="../static/js/background.js"></script>
+    <script type="module" src="../static/js/login.js"></script>
     <!-- Font for Google and Facebook icons-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -20,7 +26,32 @@
     <div class="shape"></div>
 
     <!-- Subtle particle effects-->
-     <div class="particles" id="particles"></div>
+    <div class="particles" id="particles"></div>
+
+    <!-- Create Account-->
+    <div class="create-account-container">
+        <form id="signup-form">
+            <h3>Create Account</h3>
+
+            <label for="email">Email</label>
+            <input type="email" placeholder="Email" id="email" required>
+
+            <label for="password">Password</label>
+            <input type="password" placeholder="Password" id="password" required>
+
+            <button id="submit" type="submit">Create Account</button>
+
+            <div class="social-media">
+                <div class="google" id="google"><i class="fab fa-google"></i> Sign in with Google</div>
+                <div class="fb" id="fb"><i class="fab fa-facebook"></i> Sign in with Facebook</div>
+            </div>
+
+            <p class="form-text">
+            Already have an account? <span><a href="index.html">Login Here</a></span>
+            </p>
+
+        </form>
+    </div>
 
 </body>
 </html>
