@@ -9,3 +9,4 @@ json5
 coqui-tts
 flask
 flask-cors
+flask-bcrypt

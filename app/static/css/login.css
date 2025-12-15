@@ -163,6 +163,11 @@ button#submit {
     width: 100%;
 }
 
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
 @keyframes popup {
     from {
         transform: translateY(20px) scale(0.95);
