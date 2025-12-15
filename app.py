@@ -1,4 +1,5 @@
 import time
+import google.generativeai as genai
 from flask import (
     Flask,
     jsonify,
@@ -10,12 +11,17 @@ from flask_bcrypt import Bcrypt
 
 # Module
 from config.firebase import firebase_auth
+from config.setting import API_KEY
 from services.gmail import send_otp
 
 app = Flask(__name__)
 app.secret_key = "ielts_listening_generator_secret_key"
 bcrypt = Bcrypt(app)
 CORS(app)
+
+# Initialize GenAI
+genai.configure(api_key=API_KEY)
+model = genai.GenerativeModel("gemini-2.5-flash")
 
 # Login Information Storage
 login_activity = {}

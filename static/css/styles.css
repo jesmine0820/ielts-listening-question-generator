@@ -4,14 +4,18 @@
     box-sizing: border-box;
 }
 
+html {
+    height: auto;
+    min-height: 100%;
+}
+
 body {
-    min-height: 100vh;
-    overflow: hidden;
+    height: auto;
+    min-height: 100%;
     font-family:'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 100vh;
     margin: 0;
 }
 
