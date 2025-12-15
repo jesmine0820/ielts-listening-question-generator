@@ -1,20 +1,23 @@
-import os
-import pandas as pd
 from flask import (
-    Flask, Response,
-    render_template, jsonify,
-    request, session, send_from_directory
+    Flask,
+    jsonify,
+    render_template,
+    request,
 )
-
-from model.gmail import send_otp
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.secret_key = "ielts_listening_generator_secret_key"
+CORS(app)
 
 # -- Routes --
 @app.route("/")
 def index():
-    return render_template("./frontend/template/index.html")
+    return render_template("index.html")
+
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
 
 if __name__ == "__main__":
     app.run(debug=True)

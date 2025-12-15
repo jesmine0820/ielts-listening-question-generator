@@ -2,7 +2,7 @@ import smtplib
 import random
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from app.config.setting import GMAIL_PASSWORD
+from config.setting import GMAIL_PASSWORD
 
 # Gmail config
 GMAIL_USER = "jesmine0820@gmail.com"
