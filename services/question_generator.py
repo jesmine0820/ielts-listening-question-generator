@@ -10,3 +10,287 @@ from datetime import datetime
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
+# Configuration
+QUESTION_TYPE_CSV = "model_training/processed_data/questionType.csv"
+WORD_CSV = "model_training/processed_data/ielts_vocab.csv"
+TRAINING_CSV = "model_training/processed_data/training_set.csv"
+GENERATED_JSON = "model_training/generated_questions/generated_questions.json"
+TEMP_CSV = "model_training/generated_questions/temp_generated_questions.json"
+
+MAX_ATTEMPT = 5
+REWARD_GOAL = 4
+
+# Load Data
+question_type_df = pd.read_csv(QUESTION_TYPE_CSV)
+common_vocab_df = pd.read_csv(WORD_CSV)
+training_df = pd.read_csv(TRAINING_CSV)
+
+# Prompt Template
+PROMPT_TEMPLATE = """
+You are an expert IELTS Listening question generator.
+Create realistic IELTS Listening questions and transcripts following the official format.
+
+--- QUESTION REQUIREMENTS ---
+Section: {section}
+Question Type: {typeID} - {type_name}
+Question Numbers: {question_range}
+Number of Questions: {question_count}
+
+Theme: {theme}
+Specific Topic: {specific_topic}
+Additional Specifications from Test Creator: {specifications}
+
+Instructions to Display: {instruction}
+Expected Answer Format: {answer_format}
+Format Rules: {format}
+Key Listening Skills: {key_skills}
+Typical Duration: {avg_duration}
+Expected Transcript Length: {avg_script_length} words
+Audio Speed: {audio_speed}
+Key Features: {key_features}
+
+--- OUTPUT REQUIREMENTS ---
+1. Produce exactly {question_count} questions.
+2. Output MUST be valid JSON ONLY, with these keys:
+   "Section", "Type", "Instructions", "Diagram",
+   "Questions", "Answers", "Options", "Transcript".
+3. "Questions" must be a list of strings.
+4. "Answers" must be a list of strings of equal length.
+5. The type should be T001, T002, T003 and so on only.
+6. Question instruction should be the instructions to display and expected answer format.
+7. For multiple-choice types, include "Options" (list of lists).
+8. The diagram should be drawn in the characters and plain text only. You should handle the space and next line correctly.
+9. The maximum width of the diagram is 75 characters including the border line.
+9. Transcript MUST naturally reference ALL question numbers in {question_range}.
+10. The transcript should include the introduction as the exact IELTS listening test. Do not include other explanations including question numbers and pause. Only the Narrator, People and their conversation.
+11. No Markdown. No explanations. JSON ONLY.
+
+Return the JSON format only.
+"""
+
+# JSON Parser
+def safe_json_parse(raw):
+    if not raw: return None
+    raw = raw.replace("```json", "").replace("```", "").strip()
+    try:
+        return json.loads(raw)
+    except:
+        return None
+    
+# Reward Functions
+def calculate_readability_score(text):
+    return textstat.flesch_reading_ease(str(text))
+
+def is_in_average_word_count(text, section_label):
+    if not text: return False
+    words = re.findall(r'\b\w+\b', str(text))
+    wc = len(words)
+    expected = {
+        "Section 1": (500, 700),
+        "Section 2": (600, 800),
+        "Section 3": (800, 1000),
+        "Section 4": (1000, 1200)
+    }
+    low, high = expected.get(section_label, (0, 99999))
+    return low <= wc <= high
+
+def calculate_common_word_ratio(text):
+    common_vocab = set(common_vocab_df["Words"].str.lower())
+    words = [w.lower() for w in re.findall(r'\b\w+\b', str(text))]
+    if not words: return 0
+    uncommon = [w for w in words if w not in common_vocab]
+    return len(uncommon) / len(words)
+
+def calculate_similarity(text):
+    existing_texts = []
+
+    # 1. From training_df
+    if "transcript" in training_df.columns:
+        existing_texts += training_df["transcript"].dropna().astype(str).tolist()
+
+    # 2. From generated JSON
+    if os.path.exists(GENERATED_JSON):
+        with open(GENERATED_JSON, "r", encoding="utf-8") as f:
+            saved_data = json.load(f)
+
+            for item in saved_data:
+
+                # CASE A: item is dict
+                if isinstance(item, dict):
+                    transcript = item.get("Transcript", "")
+
+                # CASE B: item is string
+                elif isinstance(item, str):
+                    transcript = item
+
+                # CASE C: item is list
+                elif isinstance(item, list):
+                    transcript = " ".join(map(str, item))
+
+                # Unknown type
+                else:
+                    continue
+
+                # Normalise to string
+                existing_texts.append(str(transcript))
+
+    # No existing corpus
+    if not existing_texts:
+        return 0.0
+
+    # Normalise input text
+    if isinstance(text, list):
+        text = " ".join(map(str, text))
+    text = str(text)
+
+    # Build TF-IDF Similarity
+    corpus = existing_texts + [text]
+
+    vec = TfidfVectorizer().fit_transform(corpus)
+    sims = cosine_similarity(vec[-1], vec[:-1]).flatten()
+
+    return max(sims) if len(sims) else 0.0
+
+# Question number calculation
+def get_question_counts(types):
+    if len(types) == 1:
+        return {types[0]: 10}
+    return {types[0]: 5, types[1]: 5}
+
+def number_ranges(counts, section_num):
+    start = (section_num - 1) * 10 + 1
+    ranges = {}
+    cur = start
+    for t, c in counts.items():
+        ranges[t] = f"{cur}-{cur+c-1}"
+        cur += c
+    return ranges
+
+# Model Call
+def model_generate(prompt):
+    response = model.generate_content(prompt)
+    return safe_json_parse(response.text)
+
+def generate_full_set(section_choices):
+    all_results = []
+
+    dt_key = datetime.now().strftime("%Y_%m_%d_%H_%M")
+
+    for section_label, entries in section_choices.items():
+        section_num = int(re.search(r"\d+", str(section_label)).group())
+        # Map typeIDs to counts
+        types = [e["typeID"] for e in entries]
+        counts = get_question_counts(types)
+        ranges = number_ranges(counts, section_num)
+
+        for entry in entries:
+            typeID = entry["typeID"]
+            theme = entry["theme"]
+            topic = entry["topic"]
+            spec = entry["spec"]
+
+            # Find the type info by typeID
+            type_row = question_type_df[question_type_df["typeID"] == typeID]
+            if type_row.empty:
+                print(f" WARNING: typeID '{typeID}' not found in question_type_df. Using placeholder info.")
+                type_info = {
+                    "type": f"Unknown Type ({typeID})",
+                    "instruction": "Follow standard instructions.",
+                    "answer_format": "List of answers",
+                    "format": "Text",
+                    "key_skills": "Listening",
+                    "avg_duration": "3-4 min",
+                    "avg_script_length": "600",
+                    "key_features": "IELTS standard",
+                    "audio_speed": "Normal"
+                }
+            else:
+                type_info = type_row.iloc[0]
+
+            q_type_name = type_info["type"]
+            question_count = counts[typeID]
+            question_range = ranges[typeID]
+
+            best_reward = -99
+            best_json = None
+
+            for attempt in range(1, MAX_ATTEMPT + 1):
+                print(f"\n[GENERATING] {section_label} - {q_type_name} Attempt {attempt}")
+
+                prompt = PROMPT_TEMPLATE.format(
+                    section=section_label,
+                    question_range=question_range,
+                    question_count=question_count,
+                    typeID=typeID,
+                    type_name=q_type_name,
+                    theme=theme,
+                    specific_topic=topic,
+                    specifications=spec,
+                    instruction=type_info["instruction"],
+                    answer_format=type_info["answer_format"],
+                    format=type_info["format"],
+                    key_skills=type_info["key_skills"],
+                    avg_duration=type_info["avg_duration"],
+                    avg_script_length=type_info["avg_script_length"],
+                    key_features=type_info["key_features"],
+                    audio_speed=type_info["audio_speed"],
+                )
+
+                model_json = model_generate(prompt)
+
+                if not isinstance(model_json, dict):
+                    print("  Invalid JSON, using placeholder")
+                    continue
+
+                transcript = model_json.get("Transcript", "")
+                reward = 0
+                if calculate_readability_score(transcript) >= 55: reward += 1
+                if is_in_average_word_count(transcript, section_label): reward += 1
+                if calculate_common_word_ratio(transcript) >= 0.1: reward += 1
+                if calculate_similarity(transcript) <= 0.85: reward += 1
+
+                print(f" -> Reward: {reward}")
+
+                if reward > best_reward:
+                    best_reward = reward
+                    best_json = model_json
+
+                if reward == REWARD_GOAL:
+                    break
+
+            # Fallback placeholder
+            if best_json is None:
+                best_json = {
+                    "Section": section_label,
+                    "Type": q_type_name,
+                    "Instructions": type_info["instruction"],
+                    "Diagram": None,
+                    "Questions": [f"Placeholder Q{i}" for i in range(1, question_count+1)],
+                    "Answers": [f"Answer_{i}" for i in range(1, question_count+1)],
+                    "Options": [None]*question_count,
+                    "Transcript": f"Placeholder transcript {question_range}"
+                }
+
+            all_results.append(best_json)
+
+    wrapped_output = {dt_key: all_results}
+
+    # Save temp copy
+    with open(TEMP_CSV, "w", encoding="utf-8") as f:
+        json.dump(wrapped_output, f, indent=2, ensure_ascii=False)
+
+    # Save or append into master JSON
+    if os.path.exists(GENERATED_JSON):
+        with open(GENERATED_JSON, "r", encoding="utf-8") as f:
+            existing = json.load(f)
+    else:
+        existing = {}
+
+    existing[dt_key] = all_results
+
+    with open(GENERATED_JSON, "w", encoding="utf-8") as f:
+        json.dump(existing, f, indent=2, ensure_ascii=False)
+
+    print(f"\n Full question set saved under key {dt_key} in {GENERATED_JSON}")
+    return wrapped_output
+

@@ -34,6 +34,10 @@ otp_store = {}
 def index():
     return render_template("index.html")
 
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
+
 @app.route("/login", methods=["POST"])
 def log_login():
     data = request.get_json()
@@ -45,10 +49,6 @@ def log_login():
 
     login_activity[uid] = {'email': email}
     return jsonify({'message': 'Login recorded successfully'}), 200
-
-@app.route("/dashboard")
-def dashboard():
-    return render_template("dashboard.html")
 
 @app.route("/forgot/send-otp", methods=["POST"])
 def send_forgot_otp():
@@ -111,19 +111,11 @@ def reset_password():
             "error": "This account uses Google Sign-In. Please log in with Google."
         }), 400
     
-    auth.update_user(user.uid, password=new_password)
+    firebase_auth.update_user(user.uid, password=new_password)
 
     otp_store.pop(email, None)
 
     return jsonify({"message": "Password reset successful"}), 200
-
-from firebase_admin import auth
-
-@app.route("/debug/firebase", methods=["GET"])
-def debug_firebase():
-    users = firebase_auth.list_users().iterate_all()
-    emails = [u.email for u in users if u.email]
-    return jsonify(emails)
 
 if __name__ == "__main__":
     app.run(debug=True)
