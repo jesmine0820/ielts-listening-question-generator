@@ -7,3 +7,5 @@ google-generativeai
 textstat
 json5
 coqui-tts
+flask
+flask-cors

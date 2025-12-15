@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Login</title>
+    <!-- Styles -->
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/background.css">
+    <link rel="stylesheet" href="../static/css/login.css">
+    <!-- JavaScripts-->
+    <script type="module" src="../static/js/app.js"></script>
+    <script type="module" src="../static/js/background.js"></script>
+    <script type="module" src="../static/js/login.js"></script>
+    <!-- Font for Google and Facebook icons-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <div class="background"></div>
+
+    <!-- Floating red objects-->
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+
+    <!-- Subtle particle effects-->
+    <div class="particles" id="particles"></div>
+
+    <!-- Create Account-->
+    <div class="modal active" id="signup-modal">
+        <div class="create-account-container">
+            <form id="signup-form">
+                <h3>Create Account</h3>
+
+                <div class="form-group">
+                    <label for="signup-email">Email</label>
+                    <input type="email" placeholder="Email" id="signup-email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="signup-password">Password</label>
+                    <input type="password" placeholder="Password" id="signup-password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="signup-confirm-password">Confirm Password</label>
+                    <input type="password" placeholder="Confirm Password" id="signup-confirm-password" required>
+                </div>
+
+                <button id="signup-submit" type="submit">Create Account</button>
+
+                <div class="social-media">
+                    <button type="button" class="social-btn google" id="signup-google">
+                        <i class="fab fa-google"></i>
+                        <span>Sign up with Google</span>
+                    </button>
+
+                    <button type="button" class="social-btn fb" id="signup-fb">
+                        <i class="fab fa-facebook-f"></i>
+                        <span>Sign up with Facebook</span>
+                    </button>
+                </div>
+
+                <p class="form-text">
+                    Already have an account? <a href="#" data-modal="login">Login Here</a>
+                </p>
+
+            </form>                     
+        </div>
+    </div>
+
+    <!-- Login -->
+    <div class="modal" id="login-modal">
+        <div class="create-account-container">
+            <form id="login-form">
+                <h3>Login</h3>
+
+                <div class="form-group">
+                    <label for="login-email">Email</label>
+                    <input type="email" placeholder="Email" id="login-email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="login-password">Password</label>
+                    <input type="password" placeholder="Password" id="login-password" required>
+                </div>
+
+                <button id="login-submit" type="submit">Login</button>
+
+                <div class="social-media">
+                    <button type="button" class="social-btn google" id="login-google">
+                        <i class="fab fa-google"></i>
+                        <span>Sign in with Google</span>
+                    </button>
+
+                    <button type="button" class="social-btn fb" id="login-fb">
+                        <i class="fab fa-facebook-f"></i>
+                        <span>Sign in with Facebook</span>
+                    </button>
+                </div>
+
+                <p class="form-text">
+                    Don't have account? <a href="#" data-modal="signup">Sign Up Here</a>
+                </p>
+                <p class="form-text">
+                    <a href="#" data-modal="forgot">Forgot Password?</a>
+                </p>
+
+            </form>                     
+        </div>
+    </div>
+
+    <!-- Forgot Password -->
+    <div class="modal" id="forgot-modal">
+        <div class="create-account-container">
+            <form id="forgot-form">
+                <h3>Forgot Password</h3>
+
+                <div class="form-group" id="forgot-email-group">
+                    <label for="forgot-email">Email</label>
+                    <input type="email" placeholder="Email" id="forgot-email" required>
+                </div>
+
+                <div class="form-group" id="forgot-otp-group" style="display: none;">
+                    <label for="forgot-otp">Enter OTP</label>
+                    <input type="text" placeholder="Enter OTP" id="forgot-otp" maxlength="6" required>
+                    <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">Check your email for the OTP code</small>
+                </div>
+
+                <div class="form-group" id="forgot-new-password-group" style="display: none;">
+                    <label for="forgot-new-password">New Password</label>
+                    <input type="password" placeholder="New Password" id="forgot-new-password" required>
+                </div>
+
+                <div class="form-group" id="forgot-confirm-password-group" style="display: none;">
+                    <label for="forgot-confirm-password">Confirm New Password</label>
+                    <input type="password" placeholder="Confirm New Password" id="forgot-confirm-password" required>
+                </div>
+
+                <button id="forgot-submit" type="submit">Send OTP</button>
+
+                <p class="form-text">
+                    Remember your password? <a href="#" data-modal="login">Login Here</a>
+                </p>
+                <p class="form-text">
+                    Don't have account? <a href="#" data-modal="signup">Sign Up Here</a>
+                </p>
+
+            </form>                     
+        </div>
+    </div>
+
+</body>
+</html>
