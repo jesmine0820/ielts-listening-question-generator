@@ -21,7 +21,7 @@ Hello,
 
 Your OTP code is: {otp}
 
-This code is valid for 10 minutes.
+This code is valid for 60 seconds.
 If you did not request this, please ignore this email.
 
 Regards,
