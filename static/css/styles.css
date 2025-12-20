@@ -17,8 +17,123 @@ body {
     justify-content: center;
     align-items: center;
     margin: 0;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .hidden {
     display: none;
+}
+
+/* ============ Header ============ */
+.header {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem 2rem;
+    background-color: #E71010;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    top: 0;
+    z-index: 100;
+}
+
+.image-container img.logo {
+    height: 50px;
+    width: auto;
+}
+
+.navigation-bar ul {
+    list-style: none;
+    display: flex;
+    gap: 6rem;
+}
+
+.navigation-bar ul li a {
+    text-decoration: none;
+    color: #ffffff;
+    font-weight: bold;
+    transition: color 0.3s;
+}
+
+.navigation-bar ul li a:hover {
+    color: #343434;
+    text-decoration: underline;
+}
+
+.profile-button {
+    border: none;
+    background: none;
+    cursor: pointer;
+}
+
+.profile-button img.profile {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+}
+
+.profile-name {
+    color: #ffffff;
+    font-weight: 600;
+    margin-right: 1rem;
+    font-size: 16px;
+}
+
+.profile-button:hover img.profile {
+    transform: scale(1.1);
+    transition: transform 0.2s;
+}
+
+/* ============ Footer ============ */
+.footer {
+    width: 100%;
+    background-color: #E71010;
+    display: flex;
+    justify-content: center;
+    column-gap: 15rem;
+    flex-wrap: wrap;
+    padding: 1.5rem 2rem;
+    border-top: 1px solid #ccc;
+}
+
+.footer .left-panel {
+    max-width: 300px;
+    margin-top: 1rem;
+}
+
+.footer .left-panel ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.footer .left-panel ul li {
+    color: #ffffff;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.footer .left-panel ul li:hover {
+    color: #343434;
+    text-decoration: underline;
+}
+
+.footer .right-panel {
+    max-width: 300px;
+}
+
+.footer .right-panel h4 {
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+}
+
+.footer .right-panel p {
+    color: #ffffff;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
 }

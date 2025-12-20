@@ -17,7 +17,7 @@
         </div>
         <div class="navigation-bar">
             <ul>
-                <li><a href="">Question Generator</a></li>
+                <li><a href="{{ url_for('question_generator') }}">Question Generator</a></li>
                 <li><a href="">History</a></li>
                 <li><a href="">Setting</a></li>
             </ul>
@@ -38,7 +38,7 @@
                 <img src="../static/images/question-generator.svg" alt="question-generator" class="question-generator">
                 <h2>Question Generator</h2>
                 <p>Customize and generate questions for any topic — with preview and audio</p>
-                <button><a href="">Get Started</a></button>
+                <button><a href="{{ url_for('question_generator') }}">Get Started</a></button>
             </div>
         </div>
     </div>

@@ -1,0 +1,234 @@
+{
+    "Theme": {
+        "Education": {
+        "Topic": [
+            "Course Enrolment",
+            "Student Accommodation",
+            "Campus Facilities",
+            "Library Services",
+            "Examination Registration",
+            "Timetable Planning",
+            "Group Assignments",
+            "Research Projects",
+            "Academic Lectures"
+            ]
+        },
+        "Travel and Accommodation": {
+        "Topic": [
+            "Hotel Booking",
+            "Apartment Rental",
+            "Hostel Accommodation",
+            "Travel Arrangements",
+            "Flight Information",
+            "Public Transport Passes",
+            "Car Rental",
+            "Tourist Attractions",
+            "Travel Insurance"
+            ]
+        },
+        "Health and Lifestyle": {
+        "Topic": [
+            "Medical Registration",
+            "Doctor Appointments",
+            "Fitness Centre Membership",
+            "Exercise Programmes",
+            "Healthy Eating",
+            "Mental Health Services",
+            "Lifestyle Advice",
+            "Wellness Workshops",
+            "Public Health Talks"
+            ]
+        },
+        "Work and Training": {
+        "Topic": [
+            "Job Applications",
+            "Interview Preparation",
+            "Workplace Induction",
+            "Employee Benefits",
+            "Internship Programmes",
+            "Professional Training",
+            "Work Schedules",
+            "Career Development",
+            "Employment Trends"
+            ]
+        },
+        "Environment": {
+        "Topic": [
+            "Recycling Services",
+            "Waste Management",
+            "Energy Conservation",
+            "Environmental Campaigns",
+            "Sustainability Projects",
+            "Water Usage",
+            "Pollution Control",
+            "Climate Change",
+            "Environmental Research"
+            ]
+        },
+        "Community and Public Services": {
+        "Topic": [
+            "Local Council Services",
+            "Community Centre Activities",
+            "Public Libraries",
+            "Sports Facilities",
+            "Cultural Events",
+            "Volunteer Programmes",
+            "Public Safety",
+            "Housing Services",
+            "Urban Development"
+            ]
+        },
+        "Technology in Daily Life": {
+        "Topic": [
+            "Internet Services",
+            "Mobile Phone Plans",
+            "Online Banking",
+            "Digital Security",
+            "E-learning Platforms",
+            "Software Training",
+            "Technology Support Services",
+            "Social Media Use",
+            "Technology Trends"
+            ]
+        }
+    },
+    "Part": {
+        "1": {
+            "type": {
+                "T001": {
+                "description": "Table Completion",
+                "instruction": "Complete the table below.",
+                "answer_format": "Write ONE WORD AND / OR A NUMBER for each answer.",
+                "format": "conversation or interview between 2 speakers",
+                "key_skills": "listening for specific details in everyday contexts",
+                "avg_duration": "3-4 min",
+                "avg_script_length": "500-700 words",
+                "key_features": "everyday topics. Slow and clear speech",
+                "audio_speed": "slower"
+                },
+                "T002": {
+                "description": "Form Completion",
+                "instruction": "Complete the form below.",
+                "answer_format": "Write ONE WORD AND / OR A NUMBER for each answer.",
+                "format": "conversation or interview between 2 speakers",
+                "key_skills": "listening for specific details in everyday contexts",
+                "avg_duration": "3-4 min",
+                "avg_script_length": "500-700 words",
+                "key_features": "everyday topics. Slow and clear speech",
+                "audio_speed": "slower"
+                },
+                "T003": {
+                "description": "Plan Labelling",
+                "instruction": "Label the plan below.",
+                "answer_format": "Write the correct letter, A-I.",
+                "format": "conversation or interview between 2 speakers",
+                "key_skills": "listening for specific details in everyday contexts",
+                "avg_duration": "3-4 min",
+                "avg_script_length": "500-700 words",
+                "key_features": "everyday topics. Slow and clear speech",
+                "audio_speed": "slower"
+                }
+            }
+        },
+        "2": {
+            "type": {
+                "T004": {
+                "description": "Map Labelling",
+                "instruction": "Label the map below.",
+                "answer_format": "Write the correct letter, A-I.",
+                "format": "talk or announcement given by one person",
+                "key_skills": "identifying factual information and following directions",
+                "avg_duration": "3-4 min",
+                "avg_script_length": "600-800 words",
+                "key_features": "information-based",
+                "audio_speed": "slightly faster"
+                },
+                "T005": {
+                "description": "Multiple Choice",
+                "instruction": "Question",
+                "answer_format": "Choose TWO letters, A-E.",
+                "format": "talk or announcement given by one person",
+                "key_skills": "identifying factual information and following directions",
+                "avg_duration": "3-4 min",
+                "avg_script_length": "600-800 words",
+                "key_features": "information-based",
+                "audio_speed": "slightly faster"
+                },
+                "T006": {
+                "description": "Matching",
+                "instruction": "Question",
+                "answer_format": "Choose FIVE answers from the box and write the correct letter, A-G.",
+                "format": "talk or announcement given by one person",
+                "key_skills": "identifying factual information and following directions",
+                "avg_duration": "3-4 min",
+                "avg_script_length": "600-800 words",
+                "key_features": "information-based",
+                "audio_speed": "slightly faster"
+                }
+            }
+        },
+        "3": {
+            "type": {
+                "T007": {
+                "description": "Multiple Choice",
+                "instruction": "Question",
+                "answer_format": "Choose the correct letter, A, B or C.",
+                "format": "student(s) with tutor discussing assignments or projects",
+                "key_skills": "understanding attitudes, agreements and academic vocabulary",
+                "avg_duration": "4-5 min",
+                "avg_script_length": "800-1000 words",
+                "key_features": "university-related with opinions or arguments",
+                "audio_speed": "faster"
+                },
+                "T008": {
+                "description": "Flow Chart Compleltion",
+                "instruction": "Complete the flow chart below.",
+                "answer_format": "Choose SIX answers from the box and write the correct letters, A-I.",
+                "format": "student(s) with tutor discussing assignments or projects",
+                "key_skills": "understanding attitudes, agreements and academic vocabulary",
+                "avg_duration": "4-5 min",
+                "avg_script_length": "800-1000 words",
+                "key_features": "university-related with opinions or arguments",
+                "audio_speed": "faster"
+                }
+            }
+        },
+        "4": {
+            "type": {
+                "T009": {
+                "description": "Sentence Completion (ONE word only)",
+                "instruction": "Complete the XXX below.",
+                "answer_format": "Write NO MORE THAN TWO WORDS for each answer.",
+                "format": "university-style lecture (One speaker only)",
+                "key_skills": "following complex ideas, academic terms and speaker’s opinion",
+                "avg_duration": "5-6 min",
+                "avg_script_length": "1000-1200 words",
+                "key_features": "complex topic with formal vocabulary",
+                "audio_speed": "fastest"
+                },
+                "T010": {
+                "description": "Sentence Completion (Not more than TWO words)",
+                "instruction": "Complete the XXX below.",
+                "answer_format": "Write ONE WORD ONLY for each answer.",
+                "format": "university-style lecture (One speaker only)",
+                "key_skills": "following complex ideas, academic terms and speaker’s opinion",
+                "avg_duration": "5-6 min",
+                "avg_script_length": "1000-1200 words",
+                "key_features": "complex topic with formal vocabulary",
+                "audio_speed": "fastest"
+                },
+                "T011": {
+                "description": "Note Completion",
+                "instruction": "Complete the note below.",
+                "answer_format": "Write ONE WORD AND / OR A NUMBER for each answer.",
+                "format": "university-style lecture (One speaker only)",
+                "key_skills": "following complex ideas, academic terms and speaker’s opinion",
+                "avg_duration": "5-6 min",
+                "avg_script_length": "1000-1200 words",
+                "key_features": "complex topic with formal vocabulary",
+                "audio_speed": "fastest"
+                }
+            }
+        }
+    }
+}

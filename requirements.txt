@@ -1,12 +1,26 @@
+# Data & Math (Crucial to keep numpy below 2.0 for Coqui/Tensorflow)
+numpy<2.0.0
 pandas
-numpy
 scikit-learn
-firebase-admin
-pymupdf
+
+# AI & Generation
 google-generativeai
+coqui-tts
 textstat
 json5
-coqui-tts
+
+# File Handling & PDFs
+pymupdf
+fpdf2
+
+# Audio Processing
+pydub
+soundfile
+
+# Web Framework & Security
 flask
 flask-cors
 flask-bcrypt
+
+# Database & Auth
+firebase-admin

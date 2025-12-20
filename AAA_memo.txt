@@ -1,0 +1,4 @@
+Current bug:
+1. Design for the preview in result.html
+2. After generating the question, it does not save the questions and transcript txt into local file
+3. Generated set saved in firestore is empty
