@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Generated Question</title>
+    <!-- Styles -->
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/result.css">
+    <!-- Scripts -->
+    <script type="module" src="../static/js/result.js"></script>
+</head>
+
+<body>
+    <div class="header">
+        <div class="image-container">
+            <img src="../static/images/ielts_logo2.png" alt="IELTS Logo" class="logo">
+        </div>
+        <div class="navigation-bar">
+            <ul>
+                <li><a href="{{ url_for('question_generator') }}">Question Generator</a></li>
+                <li><a href="{{ url_for('automated_marking')}}">Automated Marking</a></li>
+                <li><a href="{{ url_for('history') }}">History</a></li>
+            </ul>
+        </div>
+        <div class="image-container">
+            <span class="profile-name"></span>
+            <img src="../static/images/profile.png" alt="profile-icon" class="profile">
+        </div>
+    </div>
+
+    <div class="middle">
+        <div id="generation-stage">
+            <div class="status-container">
+                <h1 id="status-title">Generating Questions...</h1>
+                <p id="status-task">Connecting to server...</p> 
+                <p id="status-subtitle">Please wait while our AI prepares your IELTS material.</p>
+            </div>
+            <div class="progress-wrapper">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+            <div class="progress-info">
+                <span id="progress-percent">0%</span>
+            </div>
+            <h2 id="success-message" style="display:none;">✅ Questions Generated Successfully!</h2>
+        </div>
+
+        <div id="preview-editor-container">
+            <div class="layout-wrapper">
+                <div class="preview-panel">
+                    <h2 class="panel-title">Preview</h2>
+                    <div class="pdf-container">
+                        <iframe id="pdf-frame" src="" frameborder="0"></iframe>
+                    </div>
+                </div>
+
+                <div class="editor-panel">
+                    <h2 class="panel-title white-text">Question Editor</h2>
+                    <div class="editor-scroll">
+                        <template id="part-template">
+                            <div class="editor-group" data-part="">
+                                <div class="header-row">
+                                    <label class="q-label">Part </label>
+                                    <button class="audio-icon-btn">
+                                        <img src="../static/images/speaker_icon.png" alt="Listen" width="20">
+                                    </button>
+                                </div>
+                                
+                                <div class="mini-player" style="display:none;">
+                                    <audio controls>
+                                        <source src="" type="audio/wav">
+                                    </audio>
+                                </div>
+
+                                <div class="edit-row">
+                                    <input type="checkbox" class="edit-check"> <span>Edit / Regenerate</span>
+                                </div>
+                                <input type="text" class="spec-input" placeholder="Refine requirements for this part...">
+                            </div>
+                        </template>
+                        
+                        <div id="editor-fields-container">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-footer">
+                <div class="dropdown">
+                    <button class="dropbtn">Select Files to Export <span class="arrow">▼</span></button>
+                    <div class="dropdown-content" style="padding: 10px; min-width: 200px;">
+                        <label><input type="checkbox" class="export-file" value="Full_Set.pdf"> Full Set (PDF)</label><br>
+                        <label><input type="checkbox" class="export-file" value="Question.pdf"> Questions (PDF)</label><br>
+                        <label><input type="checkbox" class="export-file" value="Question.txt"> Questions (TXT)</label><br>
+                        <label><input type="checkbox" class="export-file" value="Transcript.txt"> Transcript (TXT)</label><br>
+                        <label><input type="checkbox" class="export-file" value="full_audio.wav"> Full Audio (WAV)</label>
+                    </div>
+                </div>
+
+                <div class="footer-btns">
+                    <button id="save-btn" class="btn-save" onclick="saveAllChanges()">
+                        <span id="save-btn-text">Save</span>
+                        <div id="save-btn-spinner" class="spinner" style="display: none;"></div>
+                    </button>
+                    <button class="btn-cancel" onclick="window.location.href='/question-generator'">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="footer">
+        <div class="left-panel">
+            <ul>
+                <li>About Us</li>
+                <li>Feedback</li>
+                <li>FaQs</li>
+            </ul>
+        </div>
+
+        <div class="right-panel">
+            <h4>Contact Us</h4>
+            <p>Email: support@ieltsapp.com</p>
+            <p>Adress: 123 Jalan Akademik, Kuala Lumpur, Malaysia</p>
+            <p>Phone: +60 123 456 789</p>
+        </div>
+
+    </div>
+</body>
+
+</html>

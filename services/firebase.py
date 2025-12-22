@@ -37,7 +37,6 @@ def get_json_from_firestore(collection_name, document_name):
         return {}
 
 def upload_file_to_storage(file_path, storage_path):
-    """Upload a file to Firebase Storage and return the download URL"""
     try:
         blob = bucket.blob(storage_path)
         blob.upload_from_filename(file_path)

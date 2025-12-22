@@ -1,11 +1,12 @@
 import time
 import os
 import json
-import re
+import threading
+import glob
 from datetime import datetime
 from flask import (
     Flask, Response,
-    jsonify, render_template, send_from_directory, stream_with_context,
+    jsonify, render_template, stream_with_context, send_from_directory,
     request, session
 )
 from flask_cors import CORS
@@ -20,15 +21,17 @@ from services.firebase import (
     add_json_to_firestore
 )
 from services.gmail import send_otp
-from services.question_generator import generate_full_set, generate_specific_part
-from services.convertion import (
-    export_full_pdf, 
-    export_questions_pdf, 
-    export_transcript_txt, 
-    export_question_txt
+from services.question_generator import (
+    generate_full_set, 
+    generate_specific_part
 )
-from services.audio import generate_section_audio, save_full_audio
+from services.convertion import generate_files
+from services.audio import (
+    generate_section_audio, 
+    save_full_audio
+)
 
+# Initialize App
 app = Flask(__name__)
 app.secret_key = "ielts_listening_generator_secret_key"
 bcrypt = Bcrypt(app)
@@ -37,231 +40,62 @@ CORS(app)
 # Storage
 login_activity = {}
 otp_store = {}
+audio_tasks = {}
 
-# Ensure folders
-TEMP_DIR = os.path.join("model", "temp")
-if not os.path.exists(TEMP_DIR):
-    os.makedirs(TEMP_DIR)
-
-# ----- Directory Helper -----
-def get_latest_set_dir():
-    base_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'sets')
-    if not os.path.exists(base_dir):
-        os.makedirs(base_dir)
-        return base_dir
-    dirs = [os.path.join(base_dir, d) for d in os.listdir(base_dir) 
-            if os.path.isdir(os.path.join(base_dir, d)) and d.startswith("set")]
-    if not dirs:
-        return base_dir
-    return max(dirs, key=os.path.getmtime)
+AUDIO_TEMP_DIR = os.path.join("static", "generated_audio")
+os.makedirs(AUDIO_TEMP_DIR, exist_ok=True)
 
 # ----- Templates Routes -----
 @app.route("/")
-def index(): return render_template("index.html")
+def index(): 
+    return render_template("index.html")
 
 @app.route("/dashboard")
-def dashboard(): return render_template("dashboard.html")
-
-@app.route("/result")
-def result(): return render_template("result.html")
+def dashboard(): 
+    return render_template("dashboard.html")
 
 @app.route("/question-generator")
-def question_generator(): return render_template("question_generator.html")
+def question_generator(): 
+    return render_template("question_generator.html")
 
-# ----- Logic Routes -----
+@app.route("/result")
+def result(): 
+    return render_template("result.html")
 
-@app.route("/generate", methods=["POST"])
-def generate_questions():
-    data = request.get_json()
-    session['user_choices'] = data 
+@app.route("/history")
+def history():
+    return render_template("history.html")
 
-    # 1. Create unique directory for this specific session
-    base_sets_dir = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'sets')
-    if not os.path.exists(base_sets_dir): os.makedirs(base_sets_dir)
+
+@app.route("/automated-marking")
+def automated_marking():
+    return render_template("automated_marking.html")
+
+# ----- Utility Function -----
+def get_latest_set_folder():
+    """Helper to find the set folder with the highest number."""
+    base_path = os.path.join("model", "output")
+    if not os.path.exists(base_path):
+        return None
     
-    existing = [int(re.search(r"set(\d+)", d).group(1)) for d in os.listdir(base_sets_dir) if re.match(r"set\d+", d)]
-    next_set_num = max(existing, default=0) + 1
-    target_dir = os.path.join(base_sets_dir, f"set{next_set_num}")
-    os.makedirs(target_dir)
-
-    def stream_progress():
-        try:
-            # PHASE 1: TEXT GENERATION
-            yield f"data: {json.dumps({'progress': 15, 'task': 'AI is generating questions...'})}\n\n"
-            output = generate_full_set(data)
-            dt_key, all_results = next(iter(output.items()))
-            
-            # PHASE 2: CONVERSION (Passing target_dir to satisfy function arguments)
-            yield f"data: {json.dumps({'progress': 35, 'task': 'Creating PDF and Text files...'})}\n\n"
-            export_full_pdf(target_dir)
-            export_questions_pdf()
-            export_transcript_txt()
-            export_question_txt()
-
-            # PHASE 3: AUDIO PART BY PART
-            part_audios = []
-            for i in range(1, 5):
-                prog = 35 + (i * 12) 
-                yield f"data: {json.dumps({'progress': prog, 'task': f'Converting Part {i} to Audio...'})}\n\n"
-                
-                # all_results is a list, not a dict. Find items for this part
-                part_transcripts = []
-                for item in all_results:
-                    if isinstance(item, dict) and item.get("Section") == f"Part {i}":
-                        transcript = item.get("Transcript", "")
-                        if transcript:
-                            part_transcripts.append(transcript)
-                
-                # Combine transcripts if there are multiple question types in this part
-                part_text = " ".join(part_transcripts) if part_transcripts else ""
-                
-                if not part_text:
-                    print(f"Warning: No transcript found for Part {i}, using placeholder")
-                    part_text = f"Placeholder transcript for Part {i}"
-                
-                audio_seg = generate_section_audio(part_text, f"Part {i}")
-                
-                save_path = os.path.join(target_dir, f"part{i}.wav")
-                audio_seg.export(save_path, format="wav")
-                part_audios.append(audio_seg)
-
-            # PHASE 4: FINAL STITCH
-            yield f"data: {json.dumps({'progress': 95, 'task': 'Finalizing full audio set...'})}\n\n"
-            save_full_audio(part_audios, os.path.join(target_dir, "full_audio.wav"))
-            
-            yield f"data: {json.dumps({'progress': 100, 'task': 'Complete!'})}\n\n"
-        except Exception as e:
-            print(f"Gen Error: {e}")
-            yield f"data: {json.dumps({'progress': 0, 'task': f'Error: {str(e)}'})}\n\n"
-
-    return Response(stream_with_context(stream_progress()), mimetype='text/event-stream')
-
-@app.route('/save-to-firebase', methods=['POST'])
-def save_to_firebase():
-    """Upload 5 files to Firebase Storage and save metadata to Firestore"""
-    try:
-        data = request.get_json()
-        email = data.get('email')
-        if not email: return jsonify({"error": "Email is required"}), 400
-        
-        username = email.split('@')[0]
-        latest_dir = get_latest_set_dir()
-        
-        dt_key = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
-        document_name = f"{dt_key}_{username}"
-        
-        # The 5 files to upload (Full set + Questions PDF + 2 TXTs + Full Audio)
-        files_to_upload = {
-            "full_set.pdf": "full_set.pdf",
-            "questions.pdf": "questions.pdf", 
-            "transcript.txt": "transcript.txt",
-            "questions.txt": "questions.txt",
-            "full_audio.wav": "full_audio.wav"
-        }
-        
-        uploaded_urls = {}
-        storage_paths = {}
-        
-        for local_filename, storage_filename in files_to_upload.items():
-            file_path = os.path.join(latest_dir, local_filename)
-            if not os.path.exists(file_path): continue
-            
-            storage_path = f"Generated_Questions/{document_name}/{storage_filename}"
-            download_url = upload_file_to_storage(file_path, storage_path)
-            
-            if download_url:
-                # Key names in Firestore cannot contain dots, using underscores
-                key_name = storage_filename.replace('.', '_')
-                uploaded_urls[key_name] = download_url
-                storage_paths[key_name] = storage_path
-        
-        firestore_data = {
-            "username": username,
-            "email": email,
-            "datetime": dt_key,
-            "created_at": datetime.now().isoformat(),
-            "files": uploaded_urls,
-            "storage_paths": storage_paths
-        }
-        
-        add_json_to_firestore("Generated_Questions", document_name, firestore_data)
-        
-        return jsonify({
-            "success": True, 
-            "message": "5 files uploaded successfully",
-            "document": document_name
-        })
-    except Exception as e:
-        print(f"Firebase Error: {e}")
-        return jsonify({"error": str(e)}), 500
-
-# ----- Audio & File Access -----
-
-@app.route('/get_audio/<int:part_num>')
-def get_audio(part_num):
-    latest_dir = get_latest_set_dir()
-    filename = f"part{part_num}.wav"
-    return send_from_directory(latest_dir, filename)
-
-@app.route("/get_latest_pdf")
-def get_latest_pdf():
-    latest_dir = get_latest_set_dir()
-    return send_from_directory(latest_dir, "full_set.pdf", mimetype='application/pdf')
-
-@app.route('/download/<file_type>')
-def download_file(file_type):
-    latest_dir = get_latest_set_dir()
-    files = {
-        "full": "full_set.pdf", 
-        "questions": "questions.pdf", 
-        "transcript": "transcript.txt", 
-        "audio": "full_audio.wav"
-    }
-    return send_from_directory(latest_dir, files.get(file_type), as_attachment=True)
-
-@app.route('/regenerate-part', methods=['POST'])
-def regen_part():
-    data = request.json
-    part_num, new_spec = int(data.get('part')), data.get('specification')
-    user_choices = session.get('user_choices')
+    folders = [f for f in os.listdir(base_path) if f.startswith("set")]
+    if not folders:
+        return None
     
-    updated_output = generate_specific_part(part_num, new_spec, user_choices)
-    
-    latest_dir = get_latest_set_dir()
-    # Ensure regenerated files go to the correct latest directory
-    export_full_pdf(latest_dir)
-    export_questions_pdf()
-    
-    # Extract the part results from the wrapped output
-    if updated_output and isinstance(updated_output, dict):
-        _, part_results = next(iter(updated_output.items()))
-        # part_results is a list, find transcripts for this part
-        part_transcripts = []
-        for item in part_results:
-            if isinstance(item, dict) and item.get("Section") == f"Part {part_num}":
-                transcript = item.get("Transcript", "")
-                if transcript:
-                    part_transcripts.append(transcript)
-        
-        # Combine transcripts if there are multiple question types
-        part_text = " ".join(part_transcripts) if part_transcripts else f"Placeholder transcript for Part {part_num}"
-    else:
-        part_text = f"Placeholder transcript for Part {part_num}"
-    
-    new_audio_seg = generate_section_audio(part_text, f"Part {part_num}")
-    new_audio_seg.export(os.path.join(latest_dir, f"part{part_num}.wav"), format="wav")
-    
-    all_audios = [AudioSegment.from_wav(os.path.join(latest_dir, f"part{i}.wav")) for i in range(1, 5)]
-    save_full_audio(all_audios, os.path.join(latest_dir, "full_audio.wav"))
-    return jsonify({"status": "success"})
+    folders.sort(key=lambda x: int(x.replace("set", "")))
+    return os.path.join(base_path, folders[-1])
 
 # ----- Login & Auth -----
-
 @app.route("/login", methods=["POST"])
 def log_login():
     data = request.get_json()
     uid, email = data.get('uid'), data.get('email')
-    if not uid or not email: return jsonify({'error': 'Missing data'}), 400
+    if not uid or not email: 
+        return jsonify({'error': 'Missing data'}), 400
+    
+    session['user_id'] = uid
+    session['email'] = email
+    
     login_activity[uid] = {'email': email}
     return jsonify({'message': 'Login recorded'}), 200
 
@@ -295,9 +129,296 @@ def reset_password():
     otp_store.pop(email, None)
     return jsonify({"message": "Reset successful"}), 200
 
+# ----- Question Generator -----
 @app.route("/api/config")
 def get_config():
     return jsonify(get_json_from_firestore("static_data", "ielts_listening_static"))
 
+@app.route("/api/generate-questions", methods=["POST"])
+def api_generate_questions():
+    user_input = request.json
+    generate_with_audio = user_input.get("generateWithAudio", False)
+    
+    section_choices = {
+        "Themes": user_input.get("Themes", user_input.get("themes", ["General"])),
+        "Part": {}
+    }
+
+    for i in range(1, 5):
+        p_key = str(i)
+        part_data = user_input.get("Part", {}).get(p_key, {})
+        
+        section_choices["Part"][p_key] = {
+            "type1": part_data.get("type1", []),
+            "topic": part_data.get("topic", []),
+            "specifications": part_data.get("specifications", []),
+            "number_of_questions": part_data.get("number_of_questions", [])
+        }
+
+    def generate_stream():
+        try:
+            yield f"data: {json.dumps({'progress': 10, 'status': 'Initializing', 'task': 'Formatting request...'})}\n\n"
+            
+            yield f"data: {json.dumps({'progress': 20, 'status': 'Generating Questions', 'task': 'Calling AI model...'})}\n\n"
+            
+            full_set_output = generate_full_set(section_choices)
+            
+            if not full_set_output or len(full_set_output) == 0:
+                raise Exception("No questions were generated. Please check your input and try again.")
+            
+            timestamp_key = list(full_set_output.keys())[0]
+            questions_list = full_set_output[timestamp_key]
+            
+            if not questions_list or len(questions_list) == 0:
+                raise Exception("Generated questions list is empty. Please try again.")
+            
+            session['generated_questions'] = questions_list
+            session['section_choices'] = section_choices
+            
+            yield f"data: {json.dumps({'progress': 50, 'status': 'Questions Generated', 'task': f'Generated {len(questions_list)} question sets'})}\n\n"
+
+            target_set_folder = generate_files()
+
+            if generate_with_audio:
+                yield f"data: {json.dumps({'progress': 60, 'status': 'Generating Audio', 'task': 'Synthesizing voices...'})}\n\n"
+                
+                part_audios = []
+                parts_dict = {}
+                for item in questions_list:
+                    section = item.get("Section", "")
+                    try:
+                        part_num = int(section.replace("Part", "").strip())
+                        if part_num not in parts_dict:
+                            parts_dict[part_num] = []
+                        parts_dict[part_num].append(item)
+                    except:
+                        part_num = len(parts_dict) + 1
+                        if part_num not in parts_dict:
+                            parts_dict[part_num] = []
+                        parts_dict[part_num].append(item)
+                
+                for part_num in range(1, 5):
+                    yield f"data: {json.dumps({'progress': 60 + (part_num * 8), 'task': f'Processing Part {part_num} audio...'})}\n\n"
+                    
+                    transcript = ""
+                    if part_num in parts_dict:
+                        for item in parts_dict[part_num]:
+                            item_transcript = item.get("Transcript", "")
+                            if item_transcript:
+                                transcript += item_transcript + "\n\n"
+                    
+                    if transcript:
+                        audio_seg = generate_section_audio(transcript, f"Part {part_num}")
+                    else:
+                        audio_seg = AudioSegment.silent(1000)
+                    
+                    temp_part_path = os.path.join(AUDIO_TEMP_DIR, f"part_{part_num}.wav")
+                    audio_seg.export(temp_part_path, format="wav")
+                    
+                    part_audios.append(audio_seg)
+                
+                if part_audios:
+                    save_full_audio(part_audios, target_set_folder)
+
+            yield f"data: {json.dumps({'progress': 100, 'success': True, 'status': 'Completed', 'task': 'Material ready!'})}\n\n"
+
+        except Exception as e:
+            print(f"Error: {e}")
+            yield f"data: {json.dumps({'progress': 0, 'error': str(e)})}\n\n"
+
+    return Response(stream_with_context(generate_stream()), mimetype='text/event-stream')
+
+@app.route("/api/regenerate-part", methods=["POST"])
+def regenerate_part():
+    data = request.json
+    part_num = data.get("part")
+    new_spec = data.get("spec")
+    
+    section_choices = session.get('section_choices')
+    
+    updated_part_wrapper = generate_specific_part(part_num, new_spec, section_choices)
+    
+    timestamp_key = list(updated_part_wrapper.keys())[0]
+    updated_json = updated_part_wrapper[timestamp_key][0]
+    
+    audio_seg = generate_section_audio(updated_json.get("Transcript", ""), f"Part {part_num}")
+    audio_seg.export(os.path.join(AUDIO_TEMP_DIR, f"part_{part_num}.wav"), format="wav")
+    
+    return jsonify({"success": True, "updated_data": updated_json})
+
+@app.route("/api/generate-audio-background", methods=["POST"])
+def api_audio_background():
+    task_id = datetime.now().strftime("%H%M%S")
+    audio_tasks[task_id] = "processing"
+    
+    generated_questions = session.get('generated_questions')
+    
+    if not generated_questions:
+        try:
+            import json
+            temp_path = os.path.join("model", "temp", "temp_generated_questions.json")
+            if os.path.exists(temp_path):
+                with open(temp_path, "r", encoding="utf-8") as f:
+                    temp_data = json.load(f)
+                    timestamp_key = list(temp_data.keys())[0]
+                    generated_questions = temp_data[timestamp_key]
+                    session['generated_questions'] = generated_questions
+        except Exception as e:
+            print(f"Error loading questions from temp file: {e}")
+            return jsonify({"error": "No generated questions found"}), 400
+    
+    if not generated_questions:
+        return jsonify({"error": "No generated questions found"}), 400
+
+    def run_background_tts(questions, tid):
+        try:
+            part_audios = []
+            parts_dict = {}
+            for item in questions:
+                section = item.get("Section", "")
+                try:
+                    part_num = int(section.replace("Part", "").strip())
+                    if part_num not in parts_dict:
+                        parts_dict[part_num] = []
+                    parts_dict[part_num].append(item)
+                except:
+                    part_num = len(parts_dict) + 1
+                    if part_num not in parts_dict:
+                        parts_dict[part_num] = []
+                    parts_dict[part_num].append(item)
+            
+            for part_num in range(1, 5):
+                transcript = ""
+                if part_num in parts_dict:
+                    for item in parts_dict[part_num]:
+                        item_transcript = item.get("Transcript", "")
+                        if item_transcript:
+                            transcript += item_transcript + "\n\n"
+                
+                if transcript:
+                    audio_seg = generate_section_audio(transcript, f"Part {part_num}")
+                    part_file = os.path.join(AUDIO_TEMP_DIR, f"part_{part_num}.wav")
+                    audio_seg.export(part_file, format="wav")
+                    part_audios.append(audio_seg)
+                else:
+                    silent_audio = AudioSegment.silent(1000)
+                    part_file = os.path.join(AUDIO_TEMP_DIR, f"part_{part_num}.wav")
+                    silent_audio.export(part_file, format="wav")
+                    part_audios.append(silent_audio)
+            
+            if part_audios:
+                save_full_audio(part_audios, os.path.join(AUDIO_TEMP_DIR, "full_audio.wav"))
+            audio_tasks[tid] = "completed"
+        except Exception as e:
+            import traceback
+            print(f"Background Audio Error: {e}")
+            traceback.print_exc()
+            audio_tasks[tid] = f"error: {str(e)}"
+
+    # Start the thread
+    thread = threading.Thread(target=run_background_tts, args=(generated_questions, task_id))
+    thread.daemon = True
+    thread.start()
+    
+    return jsonify({"task_id": task_id})
+
+@app.route("/generate_pdf_preview")
+def generate_pdf_preview():
+    directory = os.path.join("model/temp")
+    return send_from_directory(directory, "full_set.pdf")
+
+@app.route("/api/check-audio-status/<task_id>")
+def check_audio_status(task_id):
+    status = audio_tasks.get(task_id, "not_found")
+    return jsonify({"status": status})
+
+@app.route("/get_audio/<int:part_num>")
+def get_audio(part_num):
+    return send_from_directory(AUDIO_TEMP_DIR, f"part_{part_num}.wav")
+
+@app.route("/api/save-to-firebase", methods=["POST"]) # Changed 'method' to 'methods'
+def save_to_firebase():
+    try:
+        data = request.json
+        selected_filenames = data.get("files", [])
+        
+        # 1. Get User ID from session
+        uid = session.get("user_id")
+        if not uid:
+            return jsonify({"success": False, "error": "User not logged in"}), 401
+
+        # 2. Find the latest set folder dynamically
+        current_set_path = get_latest_set_folder()
+
+        if not current_set_path or not os.path.exists(current_set_path):
+            return jsonify({"success": False, "error": "No output folders found in model/output."}), 400
+
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        folder_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+        uploaded_urls = {}
+
+        # 3. Upload each selected file
+        for filename in selected_filenames:
+            # Match the filenames exactly as they are in the directory
+            local_file_path = os.path.join(current_set_path, filename)
+            
+            # Case-insensitive check just in case
+            if not os.path.exists(local_file_path):
+                # Try lowercase if exact match fails
+                local_file_path = os.path.join(current_set_path, filename.lower())
+
+            if os.path.exists(local_file_path):
+                storage_path = f"users/{uid}/{folder_id}/{filename}"
+                public_url = upload_file_to_storage(local_file_path, storage_path)
+                
+                if public_url:
+                    # Firestore keys can't have dots, replace with underscore
+                    safe_key = filename.replace(".", "_")
+                    uploaded_urls[safe_key] = public_url
+
+        if not uploaded_urls:
+            return jsonify({"success": False, "error": "No files were successfully uploaded."}), 400
+
+        # 4. Save Record to Firestore
+        history_entry = {
+            "uid": uid,
+            "timestamp": timestamp,
+            "folder_name": os.path.basename(current_set_path),
+            "files": uploaded_urls
+        }
+        
+        doc_id = f"{uid}_{folder_id}"
+        add_json_to_firestore("history", doc_id, history_entry)
+
+        return jsonify({"success": True, "urls": uploaded_urls})
+
+    except Exception as e:
+        print(f"Save to Firebase Error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# ----- History -----
+@app.route("/api/get-history")
+def get_user_history():
+    uid = session.get("user_id") # Ensure you set this at login
+    if not uid:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    try:
+        # Query Firestore for documents belonging to this UID
+        history_ref = db.collection("history")
+        query = history_ref.where("uid", "==", uid).order_by("timestamp", direction="DESCENDING")
+        docs = query.stream()
+
+        history_list = []
+        for doc in docs:
+            data = doc.to_dict()
+            # data contains: {timestamp, folder_name, files: {filename_ext: url}}
+            history_list.append(data)
+
+        return jsonify({"success": True, "history": history_list})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+# Main
 if __name__ == "__main__":
     app.run(debug=True)

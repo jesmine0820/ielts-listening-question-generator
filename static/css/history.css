@@ -1,0 +1,85 @@
+.history-container { padding: 40px 10%; min-height: 70vh; }
+.history-header { margin-bottom: 30px; text-align: center; }
+
+.history-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.history-card {
+    background: #f9f9f9;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    border-left: 8px solid #E71010; /* IELTS Red accent */
+}
+
+.card-info h3 { color: #E71010; margin-bottom: 10px; }
+.card-info p { margin: 5px 0; color: #555; font-size: 0.9rem; }
+
+.card-actions { margin-top: 15px; }
+
+.file-dropdown {
+    width: 100%;
+    padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-bottom: 10px;
+}
+
+.btn-download {
+    width: 100%;
+    background: #E71010;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.btn-download:hover { background: #c40e0e; }
+
+/* Container for the empty state message */
+.empty-history {
+    grid-column: 1 / -1; /* Stretch across the whole grid */
+    text-align: center;
+    padding: 60px 20px;
+    background: #fdfdfd;
+    border: 2px dashed #ccc;
+    border-radius: 15px;
+    margin-top: 20px;
+}
+
+.empty-icon {
+    width: 120px;
+    opacity: 0.5;
+    margin-bottom: 20px;
+}
+
+.empty-history h3 {
+    color: #333;
+    font-size: 1.5rem;
+    margin-bottom: 10px;
+}
+
+.empty-history p {
+    color: #777;
+    margin-bottom: 25px;
+}
+
+/* Reusable primary button style */
+.btn-primary {
+    display: inline-block;
+    background-color: #E71010;
+    color: white;
+    padding: 12px 25px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.btn-primary:hover {
+    background-color: #c40e0e;
+}

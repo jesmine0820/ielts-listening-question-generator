@@ -9,7 +9,7 @@ API_KEY3 = "AIzaSyDXmaE9QQd0QBHr4konBSr_5qV0O5Q_QuY"
 GMAIL_PASSWORD = "etad ijhq fbaa hczn"
 
 # Configure API key
-genai.configure(api_key=API_KEY3)
+genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-2.5-flash")
 
 model_name = "tts_models/multilingual/multi-dataset/xtts_v2"

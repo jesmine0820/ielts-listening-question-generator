@@ -2,6 +2,7 @@
 import os
 import re
 import json
+import time
 import pandas as pd
 import google.generativeai as genai
 import textstat
@@ -18,12 +19,14 @@ TRAINING_CSV = "model_training/processed_data/training_set.csv"
 GENERATED_JSON = "model_training/generated_questions/generated_questions.json"
 TEMP_CSV = "model_training/generated_questions/temp_generated_questions.json"
 
-MAX_ATTEMPT = 3
+MAX_ATTEMPT = 2 
 REWARD_GOAL = 4
 
-# Per-run API call cap to avoid hitting quota too fast
-MAX_API_CALLS_PER_RUN = 12
+MAX_API_CALLS_PER_RUN = 10 
 API_CALL_COUNT = 0
+
+MIN_DELAY_BETWEEN_CALLS = 13
+LAST_API_CALL_TIME = 0
 
 # Load Data
 question_type_df = pd.read_csv(QUESTION_TYPE_CSV)
@@ -171,26 +174,59 @@ def number_ranges(counts, section_num):
         cur += c
     return ranges
 
-# Model Call with simple quota protection
-def model_generate(prompt):
-    global API_CALL_COUNT
+def model_generate(prompt, max_retries=3, base_delay=20):
+    global API_CALL_COUNT, LAST_API_CALL_TIME
 
-    # Hard limit on number of Gemini calls per full-set generation
     if API_CALL_COUNT >= MAX_API_CALLS_PER_RUN:
         print("[GEMINI] Local per-run API limit reached, skipping further calls.")
         return None
 
-    try:
-        response = model.generate_content(prompt)
-        API_CALL_COUNT += 1
-        return safe_json_parse(response.text)
-    except Exception as e:
-        print(f"[GEMINI] Error during generate_content: {e}")
-        return None
+    current_time = time.time()
+    time_since_last_call = current_time - LAST_API_CALL_TIME
+    if time_since_last_call < MIN_DELAY_BETWEEN_CALLS:
+        wait_time = MIN_DELAY_BETWEEN_CALLS - time_since_last_call
+        print(f"[GEMINI] Rate limiting: waiting {wait_time:.1f} seconds before next API call...")
+        time.sleep(wait_time)
+
+    for attempt in range(max_retries):
+        try:
+            LAST_API_CALL_TIME = time.time()
+            response = model.generate_content(prompt)
+            API_CALL_COUNT += 1
+            return safe_json_parse(response.text)
+            
+        except Exception as e:
+            error_str = str(e)
+            
+            if "429" in error_str or "quota" in error_str.lower() or "rate" in error_str.lower():
+                retry_delay = base_delay
+                if "retry in" in error_str.lower():
+                    try:
+                        import re
+                        delay_match = re.search(r'retry in (\d+(?:\.\d+)?)', error_str.lower())
+                        if delay_match:
+                            retry_delay = float(delay_match.group(1)) + 2
+                    except:
+                        pass
+                
+                if attempt < max_retries - 1:
+                    print(f"[GEMINI] Rate limit exceeded. Waiting {retry_delay:.1f} seconds before retry {attempt + 1}/{max_retries}...")
+                    time.sleep(retry_delay)
+                    base_delay = min(base_delay * 1.5, 60)
+                    continue
+                else:
+                    print(f"[GEMINI] Rate limit exceeded after {max_retries} attempts. Skipping this generation.")
+                    return None
+            else:
+                print(f"[GEMINI] Error during generate_content: {e}")
+                return None
+    
+    return None
 
 def generate_full_set(section_choices):
-    global API_CALL_COUNT
-    API_CALL_COUNT = 0  # reset counter for this generation run
+    global API_CALL_COUNT, LAST_API_CALL_TIME
+    API_CALL_COUNT = 0
+    LAST_API_CALL_TIME = 0
 
     all_results = []
     dt_key = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
@@ -248,6 +284,7 @@ def generate_full_set(section_choices):
 
             best_reward = -99
             best_json = None
+            rate_limit_hit = False
 
             for attempt in range(1, MAX_ATTEMPT + 1):
                 print(f"\n[GENERATING] {section_label} - {q_type_name} Attempt {attempt}")
@@ -273,8 +310,15 @@ def generate_full_set(section_choices):
 
                 model_json = model_generate(prompt)
 
+                if model_json is None:
+                    if API_CALL_COUNT >= MAX_API_CALLS_PER_RUN:
+                        print("  API call limit reached, using placeholder")
+                        rate_limit_hit = True
+                        break
+                    continue
+
                 if not isinstance(model_json, dict):
-                    print("  Invalid JSON, using placeholder")
+                    print("  Invalid JSON, trying again...")
                     continue
 
                 transcript = model_json.get("Transcript", "")
@@ -292,8 +336,10 @@ def generate_full_set(section_choices):
 
                 if reward == REWARD_GOAL:
                     break
+                
+                if attempt < MAX_ATTEMPT:
+                    time.sleep(10)
 
-            # Fallback placeholder if model fails
             if best_json is None:
                 best_json = {
                     "Section": section_label,
@@ -307,14 +353,14 @@ def generate_full_set(section_choices):
                 }
 
             all_results.append(best_json)
+            
+            time.sleep(10)
 
     wrapped_output = {dt_key: all_results}
 
-    # Ensure output directory exists
     output_dir = "model/temp"
     os.makedirs(output_dir, exist_ok=True)
 
-    # Save full set into output folder as standalone JSON
     output_path = os.path.join(output_dir, "temp_generated_questions.json")
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(wrapped_output, f, indent=2, ensure_ascii=False)
@@ -323,19 +369,18 @@ def generate_full_set(section_choices):
     return wrapped_output
 
 def generate_specific_part(part_num, new_spec, section_choices):
-    global API_CALL_COUNT
+    global API_CALL_COUNT, LAST_API_CALL_TIME
     API_CALL_COUNT = 0
+    LAST_API_CALL_TIME = 0
 
     dt_key = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
     part_num_str = str(part_num)
     
-    # 1. Get the data for this specific part from your config
     part_data = section_choices.get("Part", {}).get(part_num_str)
     if not part_data:
         print(f"Error: Part {part_num} configuration not found in section_choices.")
         return None
 
-    # 2. Prepare question range and counts
     types = part_data.get("type1", [])
     counts = get_question_counts(types)
     ranges = number_ranges(counts, int(part_num))
@@ -343,7 +388,6 @@ def generate_specific_part(part_num, new_spec, section_choices):
     part_results = []
     section_label = f"Part {part_num}"
 
-    # 3. Generation Loop for this part
     for i, typeID in enumerate(types):
         type_row = question_type_df[question_type_df["typeID"] == typeID]
         type_info = type_row.iloc[0] if not type_row.empty else {}
@@ -358,7 +402,6 @@ def generate_specific_part(part_num, new_spec, section_choices):
         for attempt in range(1, MAX_ATTEMPT + 1):
             print(f"\n[RE-GENERATING] {section_label} - {q_type_name} Attempt {attempt}")
             
-            # Use the NEW specification provided in the function argument
             prompt = PROMPT_TEMPLATE.format(
                 section=section_label,
                 question_range=question_range,
@@ -395,7 +438,6 @@ def generate_specific_part(part_num, new_spec, section_choices):
 
         part_results.append(best_json if best_json else {"Error": "Failed to generate"})
 
-    # 4. Save/Update JSON
     wrapped_output = {dt_key: part_results}
     output_path = os.path.join("model/temp", "temp_generated_questions.json")
     

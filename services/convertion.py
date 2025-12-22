@@ -16,15 +16,25 @@ DEJAVUSANS_FONT = os.path.join(BASE_DIR, "static", "fonts", "DejaVuSans.ttf")
 SPACEMONO_FONT = os.path.join(BASE_DIR, "static", "fonts", "SpaceMono-Regular.ttf")
 IELTS_LOGO = os.path.join(BASE_DIR, "static", "images", "ielts_logo.png")
 
-# Set folder logic
-base_folder = os.path.join(BASE_DIR, "sets")
-os.makedirs(base_folder, exist_ok=True)
+def get_set_folder():
+   
+    base_folder = os.path.join(BASE_DIR, "model", "output")
+    os.makedirs(base_folder, exist_ok=True)
 
-# Find existing set numbers
-existing = [int(re.search(r"set(\d+)", d).group(1)) for d in os.listdir(base_folder) if re.match(r"set\d+", d)]
-next_set = max(existing, default=0) + 1
-set_folder = os.path.join(base_folder, f"set{next_set}")
-os.makedirs(set_folder, exist_ok=True)
+    # Find existing set numbers
+    existing = [
+        int(re.search(r"set(\d+)", d).group(1)) 
+        for d in os.listdir(base_folder) 
+        if re.match(r"set\d+", d)
+    ]
+    next_set_num = max(existing, default=0) + 1
+    
+    target_folder = os.path.join(base_folder, f"set{next_set_num}")
+    os.makedirs(target_folder, exist_ok=True)
+
+    temp_folder = "model/temp"
+    
+    return target_folder, next_set_num, temp_folder
 
 def get_key_and_sections():
     # Verify file exists before opening
@@ -255,9 +265,10 @@ class PDF(FPDF):
         self.ln(2)
 
 # Full Set -> Question + Answers + Transcript PDF
-def export_full_pdf(target_path):
+def export_full_pdf(set_folder, next_set, temp_folder):
     key, sections = get_key_and_sections()
-    full_pdf_path = os.path.join(target_path, "full_set.pdf")
+    full_pdf_path = os.path.join(set_folder, "full_set.pdf")
+    temp_pdf_path = os.path.join(temp_folder, "full_set.pdf")
     formatted_date = format_date_from_key(key)
 
     pdf = PDF()
@@ -349,12 +360,14 @@ def export_full_pdf(target_path):
         pdf.break_line()
 
     pdf.output(full_pdf_path)
+    pdf.output(temp_pdf_path)
 
 # 2. Questoins Only PDF
-def export_questions_pdf():
+def export_questions_pdf(set_folder, next_set, temp_folder):
     key, sections = get_key_and_sections()
     formatted_date = format_date_from_key(key)
     questions_pdf_path = os.path.join(set_folder, "questions.pdf")
+    temp_pdf_path = os.path.join(temp_folder, "questions.pdf")
 
     pdf = PDF()
     pdf.add_font("DejaVu", "", DEJAVUSANS_FONT, uni=True)
@@ -415,12 +428,14 @@ def export_questions_pdf():
         next_section = section_num
 
     pdf.output(questions_pdf_path)
+    pdf.output(temp_pdf_path)
 
 # 3. Transcript Only TXT
-def export_transcript_txt():
+def export_transcript_txt(set_folder, next_set, temp_folder):
     key, sections = get_key_and_sections()
     formatted_date = format_date_from_key(key)
     transcript_txt_path = os.path.join(set_folder, "transcript.txt")
+    temp_txt_path = os.path.join(temp_folder, "transcript.txt")
 
     with open(transcript_txt_path, "w", encoding="utf-8") as file:
         # Header
@@ -450,11 +465,40 @@ def export_transcript_txt():
 
             next_section = section_num
 
+    with open(temp_txt_path, "w", encoding="utf-8") as file:
+        # Header
+        file.write("                               IELTS Listening Test \n")
+        file.write(f"                                        Set {next_set}        \n")
+        file.write(f"                                   {formatted_date}\n\n")
+
+        # Body
+        next_section = None
+
+        for section in sections:
+
+            section_num = str(section.get("Section", "")).strip()
+            transcript = section.get("Transcript", "")
+
+            # Track section
+            current_section = section_num
+
+            if current_section != next_section:
+                file.write(f"Part {section_num}\n")
+            else:
+                file.write("\n")
+
+            file.write(f"{transcript}\n")
+
+            file.write(f"\n -------------------------------------------------------------------------------------------------\n")
+
+            next_section = section_num
+
 # 4. Questions Only TXT
-def export_question_txt():
+def export_question_txt(set_folder, next_set, temp_folder):
     key, sections = get_key_and_sections()
     formatted_date = format_date_from_key(key)
     question_txt_path = os.path.join(set_folder, "questions.txt")
+    temp_txt_path = os.path.join(temp_folder, "questions.txt")
 
     with open(question_txt_path, "w", encoding="utf-8") as file:
 
@@ -528,3 +572,82 @@ def export_question_txt():
  
         file.write("                               End of Paper")
 
+    with open(temp_txt_path, "w", encoding="utf-8") as file:
+
+        # Header
+        file.write("                               IELTS Listening Test \n")
+        file.write(f"                                        Set {next_set}       \n")
+        file.write(f"                                   {formatted_date}\n\n")
+
+        # Body
+        next_section = None
+
+        for section in sections:
+
+            section_num = str(section.get("Section", "")).strip()
+            instructions = section.get("Instructions", "")
+            questions = section.get("Questions", [])
+            diagram = section.get("Diagram", "")
+            options = section.get("Options", [])
+            type_code = section.get("Type").split()[0]
+
+            # Track section
+            current_section = section_num
+
+            if current_section != next_section:
+                file.write(f"Part {section_num}\n")
+            else:
+                file.write("\n")
+
+            file.write(f"{instructions}\n\n")
+
+            if type_code in ["T001", "T003", "T004", "T008", "T011"]:
+                if diagram and diagram.strip() != "":
+                    file.write(f"{diagram}\n\n")
+                    file.write(f"Answers: \n")
+                    for q in questions:
+                        file.write(f"{q}. ________________\n")
+                else:
+                    for q in questions:
+                        file.write(f"{q}\n")
+
+            if type_code in ["T005", "T007"]:
+                if options and len(options) != 0:
+                    for q in questions:
+                        file.write(f"{q}\n")
+                        for o in options:
+                            if isinstance(o, list):  
+                                o = " ".join(o)
+                            file.write(f"{o}\n")
+                        file.write(f"\n")
+
+            if type_code == "T006":
+                file.write(f"--------------------------------\n")
+                for o in options:
+                    if isinstance(o, list):  
+                        o = " ".join(o)
+                    file.write(f"    {o}\n")
+                file.write(f"--------------------------------\n\n")
+                for q in questions:
+                    file.write(f"{q} _____________________\n")
+            
+            if type_code in ["T009", "T010"]:
+                for q in questions:
+                    file.write(f"{q}\n")
+
+            if type_code in ["T002"]:
+                file.write(f"{diagram}\n")
+
+            file.write(f"\n -------------------------------------------------------------------------------------------------\n")
+
+            next_section = section_num
+ 
+        file.write("                               End of Paper")
+
+def generate_files():
+    set_folder, next_set, temp_folder = get_set_folder()
+    export_full_pdf(set_folder, next_set, temp_folder)
+    export_questions_pdf(set_folder, next_set, temp_folder)
+    export_question_txt(set_folder, next_set, temp_folder)
+    export_transcript_txt(set_folder, next_set, temp_folder)
+    return set_folder

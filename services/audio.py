@@ -103,9 +103,18 @@ def generate_section_audio(transcript_text, section_label):
 
     return section_audio
 
-def save_full_audio(part_audios, output_path):
+def save_full_audio(part_audios, output_dir):
     combined = AudioSegment.empty()
-    for audio in part_audios:
+    for i, audio in enumerate(part_audios, 1):
+        part_path = os.path.join(output_dir, f"part_{i}.wav")
+        audio.export(part_path, format="wav")
+        
+        # Build the combined version
         combined += audio
         combined += AudioSegment.silent(2000)
-    combined.export(output_path, format="wav")
+    
+    # Export the full set audio to the set folder
+    full_audio_path = os.path.join(output_dir, "full_audio.wav")
+    combined.export(full_audio_path, format="wav")
+    
+    return full_audio_path

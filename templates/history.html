@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>IELTS Question Generator for Listening Module</title>
+    <title>History</title>
     <!-- Styles -->
     <link rel="stylesheet" href="../static/css/styles.css">
-    <link rel="stylesheet" href="../static/css/dashboard.css">
 </head>
 
 <body>
@@ -26,27 +25,37 @@
         </div>
     </div>
 
-    <div class="body-img">
-        <img src="../static/images/writing_test.avif" alt="background" class="background-picture">
-        <div class="body-container">
-            <h1>Welcome</h1>
-            <div class="flex-body-block">
-                <div class="body-block">
-                    <img src="../static/images/question-generator.svg" alt="question-generator" class="question-generator">
-                    <h2>Question Generator</h2>
-                    <p>Customize and generate questions for any topic — with preview and audio</p>
-                    <button><a href="{{ url_for('question_generator') }}">Get Started</a></button>
-                </div>
+    <middle>
+        <div class="history-container">
+            <div class="history-header">
+                <h2>Your Practice History</h2>
+                <p>Access and download your previously generated IELTS materials.</p>
+            </div>
+            
+            <div id="history-list" class="history-grid">
+                <div class="loader"></div> </div>
+        </div>
 
-                <div class="body-block">
-                    <img src="../static/images/automated_marking.jpeg" alt="automated_marking" class="question-generator">
-                    <h2>Automated Marking</h2>
-                    <p>Instantly grade assignments and provide detailed feedback using AI-powered analysis.</p>
-                    <button><a href="{{ url_for('automated_marking') }}">Get Started</a></button>
+        <template id="history-card-template">
+            <div class="history-card">
+                <div class="card-info">
+                    <h3 class="set-name">Set #1</h3>
+                    <p class="set-date">Date: 2025-12-23</p>
+                    <p class="set-time">Time: 10:30 AM</p>
+                </div>
+                <div class="card-actions">
+                    <div class="custom-select-wrapper">
+                        <select class="file-dropdown">
+                            <option value="" disabled selected>Select File...</option>
+                        </select>
+                        <button class="btn-download" onclick="downloadSelectedFile(this)">
+                            Download
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </template>
+    </middle>
 
     <div class="footer">
         <div class="left-panel">

@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>IELTS Question Generator for Listening Module</title>
+    <!-- Styles -->
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/question_generator.css">
+    <!-- JavaScripts -->
+    <script type="module" src="../static/js/app.js"></script>
+</head>
+
+<body>
+    <div class="header">
+        <div class="image-container">
+            <img src="../static/images/ielts_logo2.png" alt="IELTS Logo" class="logo">
+        </div>
+        <div class="navigation-bar">
+            <ul>
+                <li><a href="{{ url_for('question_generator') }}">Question Generator</a></li>
+                <li><a href="{{ url_for('automated_marking')}}">Automated Marking</a></li>
+                <li><a href="{{ url_for('history') }}">History</a></li>
+            </ul>
+        </div>
+        <div class="image-container">
+            <span class="profile-name"></span>
+            <img src="../static/images/profile.png" alt="profile-icon" class="profile">
+        </div>
+    </div>
+
+    <div class="middle">
+        <h1>Question Generator</h1>
+        <div class="body-container">
+            <div class="global-theme">
+                <label>Select Theme:</label>
+                <select id="global-theme-select">
+                    <option value="">Select Theme</option>
+                </select>
+            </div>
+
+            <hr>
+
+            <div class="part-container" data-part="1">
+                <h2>Part 1 <span class="question-count" data-part="1">(0/10 questions)</span></h2>
+
+                <div class="question-type-block" data-type="1">
+                    <label>Select Question Type:</label>
+                    <select class="question-type-select" data-part="1" data-type="1">
+                        <option value="">Select Question Type</option>
+                    </select>
+
+                    <label>Select Topic:</label>
+                    <select class="topic-select" data-part="1" data-type="1">
+                        <option value="">Select Topic</option>
+                    </select>
+
+                    <label>Specifications:</label>
+                    <textarea class="specifications-input" data-part="1" data-type="1" placeholder="Enter any specific requirements"></textarea>
+
+                    <label>Question Numbers:</label>
+                    <input type="number" class="question-numbers-input" data-part="1" data-type="1" min="1" max="10" placeholder="Select Number of Questions in This Part">
+                </div>
+
+                <button class="add-question-type-btn" data-part="1">Add Question Type</button>
+            </div>
+
+            <hr>
+
+            <div class="part-container" data-part="2">
+                <h2>Part 2 <span class="question-count" data-part="2">(0/10 questions)</span></h2>
+
+                <div class="question-type-block" data-type="1">
+                    <label>Select Question Type:</label>
+                    <select class="question-type-select" data-part="2" data-type="1">
+                        <option value="">Select Question Type</option>
+                    </select>
+
+                    <label>Select Topic:</label>
+                    <select class="topic-select" data-part="2" data-type="1">
+                        <option value="">Select Topic</option>
+                    </select>
+
+                    <label>Specifications:</label>
+                    <textarea class="specifications-input" data-part="2" data-type="1" placeholder="Enter any specific requirements or details for Part 2 questions"></textarea>
+
+                    <label>Question Numbers:</label>
+                    <input type="number" class="question-numbers-input" data-part="2" data-type="1" min="1" max="10" placeholder="Select Number of Questions in This Part">
+                </div>
+
+                <button class="add-question-type-btn" data-part="2">Add Question Type</button>
+
+            </div>
+
+            <hr>
+
+            <div class="part-container" data-part="3">
+                <h2>Part 3 <span class="question-count" data-part="3">(0/10 questions)</span></h2>
+
+                <div class="question-type-block" data-type="1">
+                    <label>Select Question Type:</label>
+                    <select class="question-type-select" data-part="3" data-type="1">
+                        <option value="">Select Question Type</option>
+                    </select>
+
+                    <label>Select Topic:</label>
+                    <select class="topic-select" data-part="3" data-type="1">
+                        <option value="">Select Topic</option>
+                    </select>
+
+                    <label>Specifications:</label>
+                    <textarea class="specifications-input" data-part="3" data-type="1" placeholder="Enter any specific requirements or details for Part 3 questions"></textarea>
+
+                    <label>Question Numbers:</label>
+                    <input type="number" class="question-numbers-input" data-part="3" data-type="1" min="1" max="10" placeholder="Select Number of Questions in This Part">
+                </div>
+
+                <button class="add-question-type-btn" data-part="3">Add Question Type</button>
+
+            </div>
+
+            <hr>
+
+            <div class="part-container" data-part="4">
+                <h2>Part 4 <span class="question-count" data-part="4">(0/10 questions)</span></h2>
+
+                <div class="question-type-block" data-type="1">
+                    <label>Select Question Type:</label>
+                    <select class="question-type-select" data-part="4" data-type="1">
+                        <option value="">Select Question Type</option>
+                    </select>
+
+                    <label>Select Topic:</label>
+                    <select class="topic-select" data-part="4" data-type="1">
+                        <option value="">Select Topic</option>
+                    </select>
+
+                    <label>Specifications:</label>
+                    <textarea class="specifications-input" data-part="4" data-type="1" placeholder="Enter any specific requirements or details for Part 4 questions"></textarea>
+
+                    <label>Question Numbers:</label>
+                    <input type="number" class="question-numbers-input" data-part="4" data-type="1" min="1" max="10" placeholder="Select Number of Questions in This Part">
+                </div>
+
+                <button class="add-question-type-btn" data-part="4">Add Question Type</button>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Submit Button -->
+    <div class="submit-container">
+        <button id="generate-btn" disabled>Generate Questions</button>
+    </div>
+
+    <div class="footer">
+        <div class="left-panel">
+            <ul>
+                <li>About Us</li>
+                <li>Feedback</li>
+                <li>FaQs</li>
+            </ul>
+        </div>
+
+        <div class="right-panel">
+            <h4>Contact Us</h4>
+            <p>Email: support@ieltsapp.com</p>
+            <p>Adress: 123 Jalan Akademik, Kuala Lumpur, Malaysia</p>
+            <p>Phone: +60 123 456 789</p>
+        </div>
+
+    </div>
+
+</body>
+
+</html>

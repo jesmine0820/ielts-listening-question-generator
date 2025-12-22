@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>IELTS Question Generator for Listening Module</title>
+    <title>Automated Marking</title>
     <!-- Styles -->
     <link rel="stylesheet" href="../static/css/styles.css">
-    <link rel="stylesheet" href="../static/css/dashboard.css">
 </head>
 
 <body>
@@ -26,26 +25,8 @@
         </div>
     </div>
 
-    <div class="body-img">
-        <img src="../static/images/writing_test.avif" alt="background" class="background-picture">
-        <div class="body-container">
-            <h1>Welcome</h1>
-            <div class="flex-body-block">
-                <div class="body-block">
-                    <img src="../static/images/question-generator.svg" alt="question-generator" class="question-generator">
-                    <h2>Question Generator</h2>
-                    <p>Customize and generate questions for any topic — with preview and audio</p>
-                    <button><a href="{{ url_for('question_generator') }}">Get Started</a></button>
-                </div>
-
-                <div class="body-block">
-                    <img src="../static/images/automated_marking.jpeg" alt="automated_marking" class="question-generator">
-                    <h2>Automated Marking</h2>
-                    <p>Instantly grade assignments and provide detailed feedback using AI-powered analysis.</p>
-                    <button><a href="{{ url_for('automated_marking') }}">Get Started</a></button>
-                </div>
-            </div>
-        </div>
+    <div class="middle">
+        <h2>Automated Marking</h2>
     </div>
 
     <div class="footer">
