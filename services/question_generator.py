@@ -438,7 +438,6 @@ def generate_specific_part(part_num, new_spec, section_choices):
 
         part_results.append(best_json if best_json else {"Error": "Failed to generate"})
 
-    # Load existing full set (if any) and merge this part's results into it
     temp_path = os.path.join("static", "temp", "temp_generated_questions.json")
 
     try:

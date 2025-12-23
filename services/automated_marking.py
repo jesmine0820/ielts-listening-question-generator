@@ -46,7 +46,6 @@ def extract_text_from_upload(file_path):
     return ""
 
 def mark_batch_answers(official_key_text, student_data_list):
-    # Format student data for the prompt
     students_input_str = ""
     for i, text in enumerate(student_data_list):
         students_input_str += f"\n--- STUDENT {i+1} ---\n{text}\n"

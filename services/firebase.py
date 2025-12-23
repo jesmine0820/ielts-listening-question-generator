@@ -2,7 +2,6 @@ import firebase_admin
 from firebase_admin import credentials, auth, firestore
 import os
 
-# Initialize Firebase only if service account key exists; otherwise operate in local-only mode
 firebase_auth = None
 db = None
 
@@ -10,7 +9,6 @@ if os.path.exists("config/serviceAccountKey.json"):
     try:
         if not firebase_admin._apps:
             cred = credentials.Certificate("config/serviceAccountKey.json")
-            # NOTE: storageBucket may be absent in some projects; guard initialization
             firebase_admin.initialize_app(cred, {
                 'storageBucket': 'final-year-project-96d1e.appspot.com'
             })

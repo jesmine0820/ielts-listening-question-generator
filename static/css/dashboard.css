@@ -2,7 +2,7 @@
 .body-img {
     position: relative;
     width: 100%;
-    min-height: 60vh; /* smaller hero by default */
+    min-height: 60vh;
     display: flex;
     justify-content: center;
     align-items: center;

@@ -176,7 +176,7 @@
     font-weight: bold;
     font-size: 1.1rem;
     cursor: pointer;
-    background: #E5635C; /* Lighter red from image */
+    background: #E71010;
 }
 
 .btn-save {
@@ -184,7 +184,7 @@
     align-items: center;
     justify-content: center;
     gap: 10px;
-    min-width: 140px; /* Prevents button from shrinking when text hides */
+    min-width: 140px;
 }
 
 .dropdown-content label {

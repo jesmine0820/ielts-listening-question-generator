@@ -83,7 +83,6 @@ async function checkAudioStatus(taskId, setName) {
         if (data.status === "completed") {
             clearInterval(interval);
             alert(`Audio for set ${setName} is ready!`);
-            // Optionally update a download button
             const audioLink = document.getElementById('download-audio');
             audioLink.href = `/static/output/${setName}/full_set_audio.wav`;
             audioLink.style.display = 'inline-block';
@@ -91,7 +90,6 @@ async function checkAudioStatus(taskId, setName) {
             clearInterval(interval);
             alert(`Audio generation failed: ${data.status}`);
         }
-        // else keep polling if "processing"
     }, 3000); // poll every 3 seconds
 }
 
