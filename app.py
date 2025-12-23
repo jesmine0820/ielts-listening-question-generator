@@ -25,7 +25,7 @@ from services.automated_marking import extract_text_from_pdf, extract_text_from_
 
 # Initialize App
 app = Flask(__name__)
-app.secret_key = "ielts_listening_generator_secret_key"
+app.secret_key = os.getenv("FLASK_SECRET_KEY")
 bcrypt = Bcrypt(app)
 CORS(app)
 
