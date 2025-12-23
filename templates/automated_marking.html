@@ -5,6 +5,9 @@
     <title>Automated Marking</title>
     <!-- Styles -->
     <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/automated_marking.css">
+    <!-- Scripts -->
+    <script type="module" src="../static/js/automated_marking.js"></script>
 </head>
 
 <body>
@@ -28,38 +31,54 @@
     <div class="middle">
         <h2>Automated Marking</h2>
         <div class="block-container">
-            <div class="question-set-container">
-                <label>Select Question Set:</label>
-                    <select class="question-set-select">
-                        <option value="">Select Question Set</option>
-                    </select>
-            </div>
+            <label>Select Question Set:</label>
+            <select class="question-set-select">
+                <option value="">Select Question Set</option>
+            </select>
         </div>
-        <div class="upload-file-container">
-            <h2>Upload single or multiple files (PDF, JPG, PNG)</h2>
-        </div>
-    </div>
 
-    <div class="submit-container">
-        <button id="mark-btn" disabled>Mark</button>
+        <div class="upload-container">
+            <label>Upload student files (PDF, JPG, PNG):</label>
+            <input type="file" id="answer-files" multiple>
+        </div>
+
+        <div class="submit-container">
+            <button id="mark-btn" disabled>Mark</button>
+        </div>
+
+        <div class="pdf-result" style="display:none;">
+            <h3>Marking Result</h3>
+            <iframe id="pdf-viewer" src="" style="width:100%; height:600px;" frameborder="0"></iframe>
+            <a id="download-link" href="" download class="btn-download">Download PDF</a>
+        </div>
     </div>
 
     <div class="footer">
-        <div class="left-panel">
+        <div class="footer-section">
+            <h4>About Us</h4>
+            <p>We are an IELTS Listening practice platform providing automated question generation, audio synthesis, and marking tools to help students improve efficiently.</p>
+        </div>
+
+        <div class="footer-section">
+            <h4>Feedback</h4>
+            <form id="feedback-form">
+                <textarea id="feedback-text" placeholder="Share your thoughts about our system..." rows="4" required></textarea>
+                <button type="submit">Submit Feedback</button>
+            </form>
+            <p id="feedback-msg" style="color: green; display: none;">Thank you for your feedback!</p>
+        </div>
+
+        <div class="footer-section">
+            <h4>FAQs</h4>
             <ul>
-                <li>About Us</li>
-                <li>Feedback</li>
-                <li>FaQs</li>
+                <li><strong>Q:</strong> How does automated marking work?<br>
+                    <strong>A:</strong> The system uses AI to compare student answers against the official answer set and generates a marking PDF.</li>
+                <li><strong>Q:</strong> Can I download the audio files?<br>
+                    <strong>A:</strong> Yes! After generating the questions, you can download individual part audio or the full audio set.</li>
+                <li><strong>Q:</strong> How long does audio generation take?<br>
+                    <strong>A:</strong> It depends on the number of questions. The system notifies you once the audio is ready.</li>
             </ul>
         </div>
-
-        <div class="right-panel">
-            <h4>Contact Us</h4>
-            <p>Email: support@ieltsapp.com</p>
-            <p>Adress: 123 Jalan Akademik, Kuala Lumpur, Malaysia</p>
-            <p>Phone: +60 123 456 789</p>
-        </div>
-
     </div>
 
 </body>

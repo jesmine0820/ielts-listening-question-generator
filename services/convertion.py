@@ -145,15 +145,25 @@ class PDF(FPDF):
 
     # 2. MCQ
     def write_mcq(self, questions, options):
-        self.set_x(self.LEFT_CONTENT_MARGIN)
         self.set_font("DejaVu", "", 10)
-        for q in questions:
+
+        for idx, question in enumerate(questions, start=1):
             self.set_x(self.LEFT_CONTENT_MARGIN)
-            self.multi_cell(0, 6, f"{q}")
-            for o in options:
-                self.set_x(self.LEFT_CONTENT_MARGIN)
-                self.multi_cell(0, 6, f"{o}")
-        self.ln(4)
+
+            # Write question
+            self.multi_cell(0, 6, f"{idx}. {question}")
+            self.ln(1)
+
+            # Safety check
+            if idx - 1 >= len(options):
+                continue
+
+            # Write options for this question
+            for opt in options[idx - 1]:
+                self.set_x(self.LEFT_CONTENT_MARGIN + 5)
+                self.multi_cell(0, 6, opt)
+
+            self.ln(4)  # Space between questions
 
     # 3. Matching
     def write_matching(self, questions, options):

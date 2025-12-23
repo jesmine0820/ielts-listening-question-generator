@@ -2,11 +2,11 @@ import time
 import os
 import json
 import threading
-import glob
+import tempfile
 from datetime import datetime
 from flask import (
     Flask, Response,
-    jsonify, render_template, stream_with_context, send_from_directory, send_file,
+    jsonify, render_template, stream_with_context, send_from_directory, 
     request, session
 )
 import io
@@ -18,15 +18,10 @@ from pydub import AudioSegment
 # Modules
 from services.firebase import firebase_auth
 from services.gmail import send_otp
-from services.question_generator import (
-    generate_full_set, 
-    generate_specific_part
-)
+from services.question_generator import generate_full_set, generate_specific_part
 from services.convertion import generate_files, export_full_pdf
-from services.audio import (
-    generate_section_audio, 
-    save_full_audio
-)
+from services.audio import generate_section_audio, save_full_audio
+from services.automated_marking import extract_text_from_pdf, extract_text_from_upload, mark_batch_answers, export_results_to_pdf
 
 # Initialize App
 app = Flask(__name__)
@@ -82,15 +77,6 @@ def get_latest_set_folder():
     folders.sort(key=lambda x: int(x.replace("set", "")))
     return os.path.join(base_path, folders[-1])
 
-
-def upload_and_record_set(target_set_folder, questions_list=None):
-    """Disabled: saving to Firebase is turned off. This stub keeps compatibility
-    with existing call sites. Files are saved locally under `static/` by the
-    generation routines; no remote upload is performed here.
-    """
-    print("upload_and_record_set: disabled (no Firebase upload).")
-    return None
-
 # ----- Login & Auth -----
 @app.route("/login", methods=["POST"])
 def log_login():
@@ -138,7 +124,6 @@ def reset_password():
 # ----- Question Generator -----
 @app.route("/api/config")
 def get_config():
-    # Serve local static configuration instead of fetching from Firestore
     try:
         cfg_path = os.path.join("model", "data", "static.json")
         if os.path.exists(cfg_path):
@@ -235,9 +220,6 @@ def api_generate_questions():
                 if part_audios:
                     full_audio_path = save_full_audio(part_audios, target_set_folder)
 
-                    # Immediate audio generation completed; audio is saved locally in the set folder.
-                    # No Firebase uploads are performed (local-only saving).
-
             yield f"data: {json.dumps({'progress': 100, 'success': True, 'status': 'Completed', 'task': 'Material ready!'})}\n\n"
 
         except Exception as e:
@@ -262,17 +244,16 @@ def regenerate_part():
     audio_seg = generate_section_audio(updated_json.get("Transcript", ""), f"Part {part_num}")
     audio_seg.export(os.path.join(AUDIO_TEMP_DIR, f"part_{part_num}.wav"), format="wav")
 
-    # Rebuild preview PDF into static/temp so the frontend iframe can refresh
     try:
         temp_folder = os.path.join("static", "temp")
         os.makedirs(temp_folder, exist_ok=True)
-        # Use temp_folder as both set_folder and temp_folder so full_set.pdf is written there
         export_full_pdf(temp_folder, 0, temp_folder)
     except Exception as e:
         print(f"Error regenerating preview PDF: {e}")
 
     return jsonify({"success": True, "updated_data": updated_json})
 
+# ----- Audio -----
 @app.route("/api/generate-audio-background", methods=["POST"])
 def api_audio_background():
     task_id = datetime.now().strftime("%H%M%S")
@@ -335,16 +316,13 @@ def api_audio_background():
             
             full_audio_path = None
             if part_audios:
-                # Save parts and combined full audio into AUDIO_TEMP_DIR
                 full_audio_path = save_full_audio(part_audios, AUDIO_TEMP_DIR)
 
-            # After background audio generation, copy full audio into the latest set folder
             try:
                 latest_set = get_latest_set_folder()
                 if latest_set and full_audio_path and os.path.exists(full_audio_path):
                     try:
                         dest = os.path.join(latest_set, os.path.basename(full_audio_path))
-                        # Copy full audio into the set folder so it is bundled with other files
                         import shutil
                         shutil.copy(full_audio_path, dest)
                     except Exception as e:
@@ -366,106 +344,104 @@ def api_audio_background():
     
     return jsonify({"task_id": task_id})
 
-@app.route("/generate_pdf_preview")
-def generate_pdf_preview():
-    directory = os.path.join("static/temp")
-    return send_from_directory(directory, "full_set.pdf")
+@app.route("/api/check-or-generate-audio/<set_name>")
+def check_or_generate_audio(set_name):
+    """
+    Check if full audio exists for the set.
+    If not, generate in background and return a task_id.
+    """
+    set_folder = os.path.join("static", "output", set_name)
+    if not os.path.exists(set_folder):
+        return jsonify({"success": False, "error": "Set folder not found"}), 404
+
+    full_audio_path = os.path.join(set_folder, "full_set_audio.wav")
+
+    # If audio already exists, return ready status
+    if os.path.exists(full_audio_path):
+        return jsonify({"success": True, "status": "ready", "audio_url": f"/static/output/{set_name}/full_set_audio.wav"})
+
+    # Start background generation if not exists
+    task_id = f"audio_{set_name}_{int(time.time())}"
+    audio_tasks[task_id] = "processing"
+
+    def generate_set_audio():
+        try:
+            # Load student-generated questions
+            temp_questions_path = os.path.join(set_folder, "questions.json")
+            if not os.path.exists(temp_questions_path):
+                audio_tasks[task_id] = "error: questions.json not found"
+                return
+
+            import json
+            with open(temp_questions_path, "r", encoding="utf-8") as f:
+                questions = json.load(f)
+
+            part_audios = []
+            parts_dict = {}
+            for item in questions:
+                section = item.get("Section", "")
+                try:
+                    part_num = int(section.replace("Part", "").strip())
+                    parts_dict.setdefault(part_num, []).append(item)
+                except:
+                    part_num = len(parts_dict) + 1
+                    parts_dict.setdefault(part_num, []).append(item)
+
+            from services.audio import generate_section_audio, save_full_audio
+            for part_num in range(1, 5):
+                transcript = ""
+                if part_num in parts_dict:
+                    for item in parts_dict[part_num]:
+                        transcript += item.get("Transcript", "") + "\n\n"
+                if transcript.strip():
+                    audio_seg = generate_section_audio(transcript, f"Part {part_num}")
+                else:
+                    from pydub import AudioSegment
+                    audio_seg = AudioSegment.silent(1000)
+
+                part_file = os.path.join(set_folder, f"part_{part_num}.wav")
+                audio_seg.export(part_file, format="wav")
+                part_audios.append(audio_seg)
+
+            # Merge all parts into full audio
+            if part_audios:
+                full_audio_file = save_full_audio(part_audios, set_folder)
+                audio_tasks[task_id] = "completed"
+            else:
+                audio_tasks[task_id] = "error: no audio generated"
+        except Exception as e:
+            audio_tasks[task_id] = f"error: {str(e)}"
+
+    # Run generation in background
+    thread = threading.Thread(target=generate_set_audio)
+    thread.daemon = True
+    thread.start()
+
+    return jsonify({"success": True, "status": "processing", "task_id": task_id})
 
 @app.route("/api/check-audio-status/<task_id>")
 def check_audio_status(task_id):
     status = audio_tasks.get(task_id, "not_found")
     return jsonify({"status": status})
 
+@app.route("/api/audio-task-status/<task_id>")
+def audio_task_status(task_id):
+    """
+    Check the status of audio generation task.
+    """
+    status = audio_tasks.get(task_id, "not_found")
+    return jsonify({"task_id": task_id, "status": status})
+
 @app.route("/get_audio/<int:part_num>")
 def get_audio(part_num):
     return send_from_directory(AUDIO_TEMP_DIR, f"part_{part_num}.wav")
 
-@app.route("/api/save-to-firebase", methods=["POST"]) # Changed 'method' to 'methods'
-def save_to_firebase():
-    try:
-        data = request.json
-        selected_filenames = data.get("files", [])
-        
-        # 1. Get User ID from session
-        uid = session.get("user_id")
-        if not uid:
-            return jsonify({"success": False, "error": "User not logged in"}), 401
+# ----- File Handler -----
 
-        # 2. Find the latest set folder dynamically
-        current_set_path = get_latest_set_folder()
-
-        if not current_set_path or not os.path.exists(current_set_path):
-            return jsonify({"success": False, "error": "No output folders found in static/output."}), 400
-
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        folder_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-        saved_urls = {}
-
-        # Destination folder under static for saved sets (local-only)
-        dest_base = os.path.join("static", "saved_sets", f"{uid}_{folder_id}")
-        os.makedirs(dest_base, exist_ok=True)
-
-        # 3. Copy each selected file into local saved folder
-        for filename in selected_filenames:
-            # Try to find file in the latest set folder or in audio temp
-            candidates = [
-                os.path.join(current_set_path, filename),
-                os.path.join(current_set_path, filename.lower()),
-                os.path.join(AUDIO_TEMP_DIR, filename)
-            ]
-            found = None
-            for c in candidates:
-                if c and os.path.exists(c):
-                    found = c
-                    break
-
-            if not found:
-                continue
-
-            try:
-                import shutil
-                dest_path = os.path.join(dest_base, os.path.basename(found))
-                shutil.copy(found, dest_path)
-                public_url = f"/static/saved_sets/{uid}_{folder_id}/{os.path.basename(found)}"
-                safe_key = os.path.basename(found).replace('.', '_')
-                saved_urls[safe_key] = public_url
-            except Exception as e:
-                print(f"Failed to copy {found} to saved sets: {e}")
-
-        if not saved_urls:
-            return jsonify({"success": False, "error": "No files were found to save locally."}), 400
-
-        # Attempt to also save the temp_generated_questions.json into Firestore under 'Generated Question'
-        try:
-            temp_json_path = os.path.join("static", "temp", "temp_generated_questions.json")
-            if os.path.exists(temp_json_path):
-                with open(temp_json_path, 'r', encoding='utf-8') as tf:
-                    temp_data = json.load(tf)
-
-                # Build a record to save: include uid and timestamp and the payload
-                record = {
-                    "uid": uid,
-                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "data": temp_data
-                }
-                try:
-                    # import locally to avoid top-level Firestore dependency
-                    from services.firebase import add_json_to_firestore
-                    doc_name = f"{uid}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
-                    add_json_to_firestore("Generated Question", doc_name, record)
-                except Exception as e:
-                    print(f"Failed to save temp JSON to Firestore: {e}")
-
-        except Exception as e:
-            print(f"Error while attempting to save temp JSON to Firestore: {e}")
-
-        # Return local URLs for the saved files
-        return jsonify({"success": True, "urls": saved_urls})
-
-    except Exception as e:
-        print(f"Save to Firebase Error: {e}")
-        return jsonify({"success": False, "error": str(e)}), 500
-
+@app.route("/generate_pdf_preview")
+def generate_pdf_preview():
+    directory = os.path.join("static/temp")
+    return send_from_directory(directory, "full_set.pdf")
 
 @app.route("/api/download-files", methods=["POST"])
 def download_files():
@@ -480,46 +456,36 @@ def download_files():
         if not latest_set or not os.path.exists(latest_set):
             return jsonify({"success": False, "error": "No generated set folder found"}), 400
 
-        # Prepare zip in memory
+        file_mapping = {
+            "Full_Set.pdf": "full_set.pdf",
+            "Question.pdf": "questions.pdf",
+            "Question.txt": "questions.txt",
+            "Transcript.txt": "transcript.txt",
+            "Audio Part 1": "part_1.wav",
+            "Audio Part 2": "part_2.wav",
+            "Audio Part 3": "part_3.wav",
+            "Audio Part 4": "part_4.wav",
+            "Full Audio": "full_set_audio.wav"
+        }
+
         zip_buffer = io.BytesIO()
         with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
             found_any = False
             for req in selected_filenames:
-                # Map request names to real filenames (case-insensitive)
-                candidates = []
-                name_lower = req.lower()
-                if 'full' in name_lower and 'pdf' in name_lower:
-                    candidates = ['full_set.pdf', 'Full_Set.pdf']
-                elif 'question' in name_lower and 'pdf' in name_lower:
-                    candidates = ['questions.pdf', 'Question.pdf', 'questions.pdf']
-                elif 'question' in name_lower and 'txt' in name_lower:
-                    candidates = ['questions.txt', 'Question.txt']
-                elif 'transcript' in name_lower:
-                    candidates = ['transcript.txt', 'Transcript.txt']
-                elif 'audio' in name_lower or 'wav' in name_lower:
-                    candidates = ['full_set_audio.wav', 'full_audio.wav', 'full_audio.wav']
-                else:
-                    candidates = [req]
-
-                # Search in latest_set and AUDIO_TEMP_DIR
-                for cand in candidates:
-                    local1 = os.path.join(latest_set, cand)
-                    local2 = os.path.join(AUDIO_TEMP_DIR, cand)
-                    if os.path.exists(local1):
-                        zf.write(local1, arcname=os.path.basename(local1))
-                        found_any = True
-                        break
-                    if os.path.exists(local2):
-                        zf.write(local2, arcname=os.path.basename(local2))
-                        found_any = True
-                        break
+                fname = file_mapping.get(req)
+                if not fname:
+                    continue
+                local1 = os.path.join(latest_set, fname)
+                local2 = os.path.join(AUDIO_TEMP_DIR, fname)
+                if os.path.exists(local1):
+                    zf.write(local1, arcname=fname)
+                    found_any = True
+                elif os.path.exists(local2):
+                    zf.write(local2, arcname=fname)
+                    found_any = True
 
             if not found_any:
-                return jsonify({"success": False, "error": "No matching files found to download"}), 404
-
-        zip_buffer.seek(0)
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        return send_file(zip_buffer, mimetype='application/zip', as_attachment=True, download_name=f"ielts_materials_{timestamp}.zip")
+                return jsonify({"success": False, "error": "No matching files found"}), 404
 
     except Exception as e:
         print(f"Download files error: {e}")
@@ -528,24 +494,24 @@ def download_files():
 # ----- History -----
 @app.route("/api/get-history")
 def get_user_history():
-    uid = session.get("user_id") # Ensure you set this at login
-    if not uid:
-        return jsonify({"error": "Unauthorized"}), 401
-
     try:
         base = os.path.join("static", "output")
         if not os.path.exists(base):
             return jsonify({"success": True, "history": []})
 
-        sets = [d for d in os.listdir(base) if os.path.isdir(os.path.join(base, d)) and d.startswith("set")]
+        sets = [
+            d for d in os.listdir(base)
+            if os.path.isdir(os.path.join(base, d)) and d.startswith("set")
+        ]
+
         sets.sort(key=lambda x: int(x.replace("set", "")), reverse=True)
 
         history_list = []
         for s in sets:
             folder = os.path.join(base, s)
-            # Use folder ctime as a timestamp
             ts = os.path.getctime(folder)
             dt = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
+
             files = {}
             for fname in os.listdir(folder):
                 fpath = os.path.join(folder, fname)
@@ -554,15 +520,79 @@ def get_user_history():
                     files[key] = f"/static/output/{s}/{fname}"
 
             history_list.append({
-                "uid": uid,
                 "timestamp": dt,
                 "folder_name": s,
                 "files": files
             })
 
         return jsonify({"success": True, "history": history_list})
+
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+
+# ----- Automated Marking -----
+@app.route("/api/automated-marking", methods=["POST"])
+def automated_marking_api():
+    set_name = request.form.get("set_name")
+    files = request.files.getlist("files")
+
+    if not set_name or not files:
+        return jsonify({"success": False, "error": "Missing data"}), 400
+
+    set_dir = os.path.join("static", "output", set_name)
+    full_pdf_path = os.path.join(set_dir, "full_set.pdf")
+
+    if not os.path.exists(full_pdf_path):
+        return jsonify({"success": False, "error": "Official full_set.pdf not found"}), 404
+
+    # Extract official answers from full_set.pdf
+    official_text = extract_text_from_pdf(full_pdf_path)
+
+    # Extract text from uploaded student files
+    student_texts = []
+    with tempfile.TemporaryDirectory() as tmp:
+        for file in files:
+            path = os.path.join(tmp, file.filename)
+            file.save(path)
+            student_texts.append(extract_text_from_upload(path))
+
+    # Call AI model to mark
+    raw_result = mark_batch_answers(official_text, student_texts)
+
+    try:
+        results = json.loads(raw_result)
+    except Exception as e:
+        return jsonify({"success": False, "error": f"AI output parsing failed: {e}"}), 500
+
+    # Generate PDF report
+    dir = "static/marking_data"
+    output_pdf = os.path.join(dir, "marking_result.pdf")
+    export_results_to_pdf(results, full_pdf_path, output_pdf)
+
+    return jsonify({
+        "success": True,
+        "pdf_url": f"/static/marking_data/marking_result.pdf"
+    })
+
+# ----- Feedback -----
+@app.route("/api/submit-feedback", methods=["POST"])
+def submit_feedback():
+    data = request.get_json()
+    comment = data.get("comment", "").strip()
+    user_email = session.get("email", "anonymous")
+
+    if not comment:
+        return jsonify({"success": False, "error": "Comment cannot be empty"}), 400
+
+    try:
+        from services.firebase import add_json_to_firestore
+        doc_name = f"{user_email}_{int(time.time())}"
+        add_json_to_firestore("feedback", doc_name, {"user": user_email, "comment": comment, "timestamp": datetime.now().isoformat()})
+        return jsonify({"success": True})
+    except Exception as e:
+        print(f"Feedback submission error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
 
 # Main
 if __name__ == "__main__":

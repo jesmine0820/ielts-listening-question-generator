@@ -363,4 +363,33 @@ document.addEventListener("DOMContentLoaded", () => {
             window.location.href = "/result";
         });
     }
+
+    const feedbackForm = document.getElementById('feedback-form');
+    const feedbackText = document.getElementById('feedback-text');
+    const feedbackMsg = document.getElementById('feedback-msg');
+
+    feedbackForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const comment = feedbackText.value.trim();
+        if (!comment) return;
+
+        try {
+            const response = await fetch('/api/submit-feedback', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ comment })
+            });
+            const data = await response.json();
+            if (data.success) {
+                feedbackMsg.style.display = 'block';
+                feedbackText.value = '';
+                setTimeout(() => { feedbackMsg.style.display = 'none'; }, 4000);
+            } else {
+                alert(data.error || 'Failed to submit feedback.');
+            }
+        } catch (err) {
+            console.error(err);
+            alert('Error submitting feedback.');
+        }
+    });
 });

@@ -1,0 +1,130 @@
+/* ===============================
+   AUTOMATED MARKING
+================================ */
+.middle {
+    max-width: 1000px;
+    margin: 40px auto;
+    padding: 0 20px;
+}
+
+/* Center the main page title */
+.middle h2 {
+    margin-bottom: 20px;
+    color: #ffffff;
+    text-align: center;
+}
+
+/* Question set block */
+.block-container {
+    background: #E71010;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    margin-bottom: 30px;
+}
+
+.block-container label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #fff;
+}
+
+.question-set-select {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 15px;
+}
+
+/* Upload area */
+.upload-container {
+    background: #E71010;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.upload-container label {
+    font-weight: 600;
+    color: #fff;
+}
+
+.upload-container input[type="file"] {
+    margin-top: 10px;
+}
+
+/* Submit button */
+.submit-container {
+    text-align: center; /* Center the button */
+    margin: 30px 0;
+}
+
+#mark-btn {
+    padding: 12px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: none;
+    background-color: #2f5bea;
+    color: #ffffff;
+    cursor: pointer;
+    display: inline-block;
+}
+
+#mark-btn:disabled {
+    background-color: #b5b5b5;
+    cursor: not-allowed;
+}
+
+#mark-btn:hover:not(:disabled) {
+    background-color: #2448c7;
+}
+
+/* PDF result section */
+.pdf-result {
+    display: none;
+    margin-top: 30px;
+    background-color: #e71019;
+    padding: 20px;
+    border-radius: 10px;
+    text-align: center; /* Center content inside */
+}
+
+.pdf-result h3 {
+    color: #fff;
+    margin-bottom: 15px;
+}
+
+#pdf-viewer {
+    width: 100%;
+    max-width: 900px;
+    height: 600px;
+    border: 0;
+    margin: 0 auto 15px auto; /* Center iframe and add bottom margin */
+    display: block;
+}
+
+.btn-download {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    background-color: #e71010;
+    color: white;
+    text-decoration: none;
+    border-radius: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .middle {
+        padding: 0 10px;
+    }
+
+    #pdf-viewer {
+        height: 400px;
+    }
+}

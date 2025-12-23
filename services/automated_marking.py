@@ -10,7 +10,7 @@ from config.setting import model
 
 reader = easyocr.Reader(['en'])
 
-def get_ietls_grade(mark_str):
+def get_ielts_grade(mark_str):
     try:
         score = int(mark_str.split('/')[0])
         if score >= 39: return "9.0"
