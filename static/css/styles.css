@@ -63,13 +63,8 @@ body {
     text-decoration: underline;
 }
 
-.profile-button {
-    border: none;
-    background: none;
-    cursor: pointer;
-}
 
-.profile-button img.profile {
+.profile {
     width: 40px;
     height: 40px;
     border-radius: 50%;

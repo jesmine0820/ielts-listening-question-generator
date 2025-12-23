@@ -113,8 +113,8 @@ def save_full_audio(part_audios, output_dir):
         combined += audio
         combined += AudioSegment.silent(2000)
     
-    # Export the full set audio to the set folder
-    full_audio_path = os.path.join(output_dir, "full_audio.wav")
+    # Export the full set audio to the set folder with standardized name
+    full_audio_path = os.path.join(output_dir, "full_set_audio.wav")
     combined.export(full_audio_path, format="wav")
-    
+
     return full_audio_path

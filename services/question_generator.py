@@ -358,7 +358,7 @@ def generate_full_set(section_choices):
 
     wrapped_output = {dt_key: all_results}
 
-    output_dir = "model/temp"
+    output_dir = os.path.join("static", "temp")
     os.makedirs(output_dir, exist_ok=True)
 
     output_path = os.path.join(output_dir, "temp_generated_questions.json")
@@ -438,11 +438,56 @@ def generate_specific_part(part_num, new_spec, section_choices):
 
         part_results.append(best_json if best_json else {"Error": "Failed to generate"})
 
-    wrapped_output = {dt_key: part_results}
-    output_path = os.path.join("model/temp", "temp_generated_questions.json")
-    
-    with open(output_path, "w", encoding="utf-8") as f:
-        json.dump(wrapped_output, f, indent=2, ensure_ascii=False)
+    # Load existing full set (if any) and merge this part's results into it
+    temp_path = os.path.join("static", "temp", "temp_generated_questions.json")
 
-    print(f"\nPart {part_num} updated with new specifications in {output_path}")
+    try:
+        if os.path.exists(temp_path):
+            with open(temp_path, "r", encoding="utf-8") as f:
+                existing = json.load(f)
+            # Get the existing key and list
+            if isinstance(existing, dict) and len(existing) > 0:
+                existing_key = next(iter(existing.keys()))
+                existing_list = existing.get(existing_key, [])
+            else:
+                existing_key = dt_key
+                existing_list = []
+        else:
+            existing_key = dt_key
+            existing_list = []
+    except Exception as e:
+        print(f"Error reading existing temp file: {e}")
+        existing_key = dt_key
+        existing_list = []
+
+    # Remove old entries for this part
+    new_list = [item for item in existing_list if str(item.get("Section", "")).strip() != section_label]
+
+    # Append new part results
+    # If generated items include Section field, ensure it's set
+    for item in part_results:
+        if isinstance(item, dict):
+            item.setdefault("Section", section_label)
+        new_list.append(item)
+
+    # Try to sort by numeric part if possible
+    def section_sort_key(it):
+        s = str(it.get("Section", ""))
+        try:
+            return int(re.sub(r"[^0-9]", "", s))
+        except:
+            return 999
+
+    new_list.sort(key=section_sort_key)
+
+    wrapped_output = {existing_key: new_list}
+
+    try:
+        os.makedirs(os.path.dirname(temp_path), exist_ok=True)
+        with open(temp_path, "w", encoding="utf-8") as f:
+            json.dump(wrapped_output, f, indent=2, ensure_ascii=False)
+    except Exception as e:
+        print(f"Error writing merged temp file: {e}")
+
+    print(f"\nPart {part_num} updated and merged into {temp_path}")
     return wrapped_output

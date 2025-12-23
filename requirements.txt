@@ -17,6 +17,10 @@ fpdf2
 pydub
 soundfile
 
+# OCR
+easyocr
+pillow
+
 # Web Framework & Security
 flask
 flask-cors

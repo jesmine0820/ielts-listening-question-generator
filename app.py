@@ -6,26 +6,23 @@ import glob
 from datetime import datetime
 from flask import (
     Flask, Response,
-    jsonify, render_template, stream_with_context, send_from_directory,
+    jsonify, render_template, stream_with_context, send_from_directory, send_file,
     request, session
 )
+import io
+import zipfile
 from flask_cors import CORS
 from flask_bcrypt import Bcrypt
 from pydub import AudioSegment
 
 # Modules
-from services.firebase import (
-    firebase_auth, 
-    get_json_from_firestore,
-    upload_file_to_storage,
-    add_json_to_firestore
-)
+from services.firebase import firebase_auth
 from services.gmail import send_otp
 from services.question_generator import (
     generate_full_set, 
     generate_specific_part
 )
-from services.convertion import generate_files
+from services.convertion import generate_files, export_full_pdf
 from services.audio import (
     generate_section_audio, 
     save_full_audio
@@ -74,7 +71,7 @@ def automated_marking():
 # ----- Utility Function -----
 def get_latest_set_folder():
     """Helper to find the set folder with the highest number."""
-    base_path = os.path.join("model", "output")
+    base_path = os.path.join("static", "output")
     if not os.path.exists(base_path):
         return None
     
@@ -84,6 +81,15 @@ def get_latest_set_folder():
     
     folders.sort(key=lambda x: int(x.replace("set", "")))
     return os.path.join(base_path, folders[-1])
+
+
+def upload_and_record_set(target_set_folder, questions_list=None):
+    """Disabled: saving to Firebase is turned off. This stub keeps compatibility
+    with existing call sites. Files are saved locally under `static/` by the
+    generation routines; no remote upload is performed here.
+    """
+    print("upload_and_record_set: disabled (no Firebase upload).")
+    return None
 
 # ----- Login & Auth -----
 @app.route("/login", methods=["POST"])
@@ -132,7 +138,16 @@ def reset_password():
 # ----- Question Generator -----
 @app.route("/api/config")
 def get_config():
-    return jsonify(get_json_from_firestore("static_data", "ielts_listening_static"))
+    # Serve local static configuration instead of fetching from Firestore
+    try:
+        cfg_path = os.path.join("model", "data", "static.json")
+        if os.path.exists(cfg_path):
+            with open(cfg_path, 'r', encoding='utf-8') as f:
+                cfg = json.load(f)
+            return jsonify(cfg)
+    except Exception as e:
+        print(f"Error loading local config: {e}")
+    return jsonify({}), 200
 
 @app.route("/api/generate-questions", methods=["POST"])
 def api_generate_questions():
@@ -218,7 +233,10 @@ def api_generate_questions():
                     part_audios.append(audio_seg)
                 
                 if part_audios:
-                    save_full_audio(part_audios, target_set_folder)
+                    full_audio_path = save_full_audio(part_audios, target_set_folder)
+
+                    # Immediate audio generation completed; audio is saved locally in the set folder.
+                    # No Firebase uploads are performed (local-only saving).
 
             yield f"data: {json.dumps({'progress': 100, 'success': True, 'status': 'Completed', 'task': 'Material ready!'})}\n\n"
 
@@ -243,7 +261,16 @@ def regenerate_part():
     
     audio_seg = generate_section_audio(updated_json.get("Transcript", ""), f"Part {part_num}")
     audio_seg.export(os.path.join(AUDIO_TEMP_DIR, f"part_{part_num}.wav"), format="wav")
-    
+
+    # Rebuild preview PDF into static/temp so the frontend iframe can refresh
+    try:
+        temp_folder = os.path.join("static", "temp")
+        os.makedirs(temp_folder, exist_ok=True)
+        # Use temp_folder as both set_folder and temp_folder so full_set.pdf is written there
+        export_full_pdf(temp_folder, 0, temp_folder)
+    except Exception as e:
+        print(f"Error regenerating preview PDF: {e}")
+
     return jsonify({"success": True, "updated_data": updated_json})
 
 @app.route("/api/generate-audio-background", methods=["POST"])
@@ -306,8 +333,25 @@ def api_audio_background():
                     silent_audio.export(part_file, format="wav")
                     part_audios.append(silent_audio)
             
+            full_audio_path = None
             if part_audios:
-                save_full_audio(part_audios, os.path.join(AUDIO_TEMP_DIR, "full_audio.wav"))
+                # Save parts and combined full audio into AUDIO_TEMP_DIR
+                full_audio_path = save_full_audio(part_audios, AUDIO_TEMP_DIR)
+
+            # After background audio generation, copy full audio into the latest set folder
+            try:
+                latest_set = get_latest_set_folder()
+                if latest_set and full_audio_path and os.path.exists(full_audio_path):
+                    try:
+                        dest = os.path.join(latest_set, os.path.basename(full_audio_path))
+                        # Copy full audio into the set folder so it is bundled with other files
+                        import shutil
+                        shutil.copy(full_audio_path, dest)
+                    except Exception as e:
+                        print(f"Failed to copy background full audio into set folder: {e}")
+            except Exception as e:
+                print(f"Error handling background audio post-processing: {e}")
+
             audio_tasks[tid] = "completed"
         except Exception as e:
             import traceback
@@ -324,7 +368,7 @@ def api_audio_background():
 
 @app.route("/generate_pdf_preview")
 def generate_pdf_preview():
-    directory = os.path.join("model/temp")
+    directory = os.path.join("static/temp")
     return send_from_directory(directory, "full_set.pdf")
 
 @app.route("/api/check-audio-status/<task_id>")
@@ -351,49 +395,134 @@ def save_to_firebase():
         current_set_path = get_latest_set_folder()
 
         if not current_set_path or not os.path.exists(current_set_path):
-            return jsonify({"success": False, "error": "No output folders found in model/output."}), 400
+            return jsonify({"success": False, "error": "No output folders found in static/output."}), 400
 
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         folder_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-        uploaded_urls = {}
+        saved_urls = {}
 
-        # 3. Upload each selected file
+        # Destination folder under static for saved sets (local-only)
+        dest_base = os.path.join("static", "saved_sets", f"{uid}_{folder_id}")
+        os.makedirs(dest_base, exist_ok=True)
+
+        # 3. Copy each selected file into local saved folder
         for filename in selected_filenames:
-            # Match the filenames exactly as they are in the directory
-            local_file_path = os.path.join(current_set_path, filename)
-            
-            # Case-insensitive check just in case
-            if not os.path.exists(local_file_path):
-                # Try lowercase if exact match fails
-                local_file_path = os.path.join(current_set_path, filename.lower())
+            # Try to find file in the latest set folder or in audio temp
+            candidates = [
+                os.path.join(current_set_path, filename),
+                os.path.join(current_set_path, filename.lower()),
+                os.path.join(AUDIO_TEMP_DIR, filename)
+            ]
+            found = None
+            for c in candidates:
+                if c and os.path.exists(c):
+                    found = c
+                    break
 
-            if os.path.exists(local_file_path):
-                storage_path = f"users/{uid}/{folder_id}/{filename}"
-                public_url = upload_file_to_storage(local_file_path, storage_path)
-                
-                if public_url:
-                    # Firestore keys can't have dots, replace with underscore
-                    safe_key = filename.replace(".", "_")
-                    uploaded_urls[safe_key] = public_url
+            if not found:
+                continue
 
-        if not uploaded_urls:
-            return jsonify({"success": False, "error": "No files were successfully uploaded."}), 400
+            try:
+                import shutil
+                dest_path = os.path.join(dest_base, os.path.basename(found))
+                shutil.copy(found, dest_path)
+                public_url = f"/static/saved_sets/{uid}_{folder_id}/{os.path.basename(found)}"
+                safe_key = os.path.basename(found).replace('.', '_')
+                saved_urls[safe_key] = public_url
+            except Exception as e:
+                print(f"Failed to copy {found} to saved sets: {e}")
 
-        # 4. Save Record to Firestore
-        history_entry = {
-            "uid": uid,
-            "timestamp": timestamp,
-            "folder_name": os.path.basename(current_set_path),
-            "files": uploaded_urls
-        }
-        
-        doc_id = f"{uid}_{folder_id}"
-        add_json_to_firestore("history", doc_id, history_entry)
+        if not saved_urls:
+            return jsonify({"success": False, "error": "No files were found to save locally."}), 400
 
-        return jsonify({"success": True, "urls": uploaded_urls})
+        # Attempt to also save the temp_generated_questions.json into Firestore under 'Generated Question'
+        try:
+            temp_json_path = os.path.join("static", "temp", "temp_generated_questions.json")
+            if os.path.exists(temp_json_path):
+                with open(temp_json_path, 'r', encoding='utf-8') as tf:
+                    temp_data = json.load(tf)
+
+                # Build a record to save: include uid and timestamp and the payload
+                record = {
+                    "uid": uid,
+                    "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "data": temp_data
+                }
+                try:
+                    # import locally to avoid top-level Firestore dependency
+                    from services.firebase import add_json_to_firestore
+                    doc_name = f"{uid}_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+                    add_json_to_firestore("Generated Question", doc_name, record)
+                except Exception as e:
+                    print(f"Failed to save temp JSON to Firestore: {e}")
+
+        except Exception as e:
+            print(f"Error while attempting to save temp JSON to Firestore: {e}")
+
+        # Return local URLs for the saved files
+        return jsonify({"success": True, "urls": saved_urls})
 
     except Exception as e:
         print(f"Save to Firebase Error: {e}")
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
+@app.route("/api/download-files", methods=["POST"])
+def download_files():
+    try:
+        data = request.get_json()
+        selected_filenames = data.get("files", [])
+
+        if not selected_filenames:
+            return jsonify({"success": False, "error": "No files requested"}), 400
+
+        latest_set = get_latest_set_folder()
+        if not latest_set or not os.path.exists(latest_set):
+            return jsonify({"success": False, "error": "No generated set folder found"}), 400
+
+        # Prepare zip in memory
+        zip_buffer = io.BytesIO()
+        with zipfile.ZipFile(zip_buffer, 'w', zipfile.ZIP_DEFLATED) as zf:
+            found_any = False
+            for req in selected_filenames:
+                # Map request names to real filenames (case-insensitive)
+                candidates = []
+                name_lower = req.lower()
+                if 'full' in name_lower and 'pdf' in name_lower:
+                    candidates = ['full_set.pdf', 'Full_Set.pdf']
+                elif 'question' in name_lower and 'pdf' in name_lower:
+                    candidates = ['questions.pdf', 'Question.pdf', 'questions.pdf']
+                elif 'question' in name_lower and 'txt' in name_lower:
+                    candidates = ['questions.txt', 'Question.txt']
+                elif 'transcript' in name_lower:
+                    candidates = ['transcript.txt', 'Transcript.txt']
+                elif 'audio' in name_lower or 'wav' in name_lower:
+                    candidates = ['full_set_audio.wav', 'full_audio.wav', 'full_audio.wav']
+                else:
+                    candidates = [req]
+
+                # Search in latest_set and AUDIO_TEMP_DIR
+                for cand in candidates:
+                    local1 = os.path.join(latest_set, cand)
+                    local2 = os.path.join(AUDIO_TEMP_DIR, cand)
+                    if os.path.exists(local1):
+                        zf.write(local1, arcname=os.path.basename(local1))
+                        found_any = True
+                        break
+                    if os.path.exists(local2):
+                        zf.write(local2, arcname=os.path.basename(local2))
+                        found_any = True
+                        break
+
+            if not found_any:
+                return jsonify({"success": False, "error": "No matching files found to download"}), 404
+
+        zip_buffer.seek(0)
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        return send_file(zip_buffer, mimetype='application/zip', as_attachment=True, download_name=f"ielts_materials_{timestamp}.zip")
+
+    except Exception as e:
+        print(f"Download files error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 # ----- History -----
@@ -404,16 +533,32 @@ def get_user_history():
         return jsonify({"error": "Unauthorized"}), 401
 
     try:
-        # Query Firestore for documents belonging to this UID
-        history_ref = db.collection("history")
-        query = history_ref.where("uid", "==", uid).order_by("timestamp", direction="DESCENDING")
-        docs = query.stream()
+        base = os.path.join("static", "output")
+        if not os.path.exists(base):
+            return jsonify({"success": True, "history": []})
+
+        sets = [d for d in os.listdir(base) if os.path.isdir(os.path.join(base, d)) and d.startswith("set")]
+        sets.sort(key=lambda x: int(x.replace("set", "")), reverse=True)
 
         history_list = []
-        for doc in docs:
-            data = doc.to_dict()
-            # data contains: {timestamp, folder_name, files: {filename_ext: url}}
-            history_list.append(data)
+        for s in sets:
+            folder = os.path.join(base, s)
+            # Use folder ctime as a timestamp
+            ts = os.path.getctime(folder)
+            dt = datetime.fromtimestamp(ts).strftime("%Y-%m-%d %H:%M:%S")
+            files = {}
+            for fname in os.listdir(folder):
+                fpath = os.path.join(folder, fname)
+                if os.path.isfile(fpath):
+                    key = fname.replace('.', '_')
+                    files[key] = f"/static/output/{s}/{fname}"
+
+            history_list.append({
+                "uid": uid,
+                "timestamp": dt,
+                "folder_name": s,
+                "files": files
+            })
 
         return jsonify({"success": True, "history": history_list})
     except Exception as e:

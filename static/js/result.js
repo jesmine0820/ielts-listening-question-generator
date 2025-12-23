@@ -193,12 +193,27 @@ document.addEventListener("DOMContentLoaded", (e) => {
             const audioBtn = clone.querySelector(".audio-icon-btn");
             const player = clone.querySelector(".mini-player");
             const audioSource = clone.querySelector("source");
-            
-            audioSource.src = `/get_audio/${i}`;
-            
-            audioBtn.onclick = () => {
-                player.style.display = player.style.display === "none" ? "block" : "none";
-            };
+
+            if (generateWithAudio) {
+                audioSource.src = `/get_audio/${i}`;
+                audioBtn.onclick = () => {
+                    player.style.display = player.style.display === "none" ? "block" : "none";
+                };
+            } else {
+                // Hide audio controls when audio was not generated
+                if (audioBtn) audioBtn.style.display = 'none';
+                if (player) player.style.display = 'none';
+            }
+
+            // Listen for edit checkbox changes to toggle main button label
+            const editCheckbox = clone.querySelector('.edit-check');
+            if (editCheckbox) {
+                editCheckbox.addEventListener('change', () => {
+                    const anyChecked = document.querySelectorAll('.edit-check:checked').length > 0;
+                    const saveBtnText = document.getElementById('save-btn-text');
+                    saveBtnText.innerText = anyChecked ? 'Regenerate' : 'Save locally';
+                });
+            }
 
             editorContainer.appendChild(clone);
         }
@@ -207,34 +222,6 @@ document.addEventListener("DOMContentLoaded", (e) => {
         pdfFrame.src = "/generate_pdf_preview"; 
     }
 });
-
-window.saveAllChanges = function() {
-    const saveBtn = document.getElementById("save-btn");
-    const btnText = document.getElementById("save-btn-text");
-    const spinner = document.getElementById("save-btn-spinner");
-
-    saveBtn.disabled = true;
-    btnText.style.display = "none";
-    spinner.style.display = "block";
-
-    const updates = [];
-    document.querySelectorAll(".editor-group").forEach(group => {
-        updates.push({
-            part: group.dataset.part,
-            needsEdit: group.querySelector(".edit-check").checked,
-            spec: group.querySelector(".spec-input").value
-        });
-    });
-
-    console.log("Saving updates:", updates);
-
-    setTimeout(() => {
-        alert("Changes saved! The PDF and Audio will be regenerated.");
-        saveBtn.disabled = false;
-        btnText.style.display = "inline";
-        spinner.style.display = "none";
-    }, 2000);
-};
 
 async function saveAllChanges() {
     const saveBtn = document.getElementById('save-btn');
@@ -250,33 +237,106 @@ async function saveAllChanges() {
         return;
     }
 
+    // Check if any edit checkboxes are selected; if none, do direct save+download flow
+    const editsSelected = document.querySelectorAll('.edit-check:checked').length > 0;
+
     // 2. Show loading state
     saveBtn.disabled = true;
     spinner.style.display = 'inline-block';
     btnText.innerText = 'Saving...';
 
     try {
-        const response = await fetch('/api/save-to-firebase', {
+        if (!editsSelected) {
+            // 1a. Save selected files locally first
+            const saveResp = await fetch('/api/save-to-firebase', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ files: selectedFiles })
+            });
+
+            const saveResult = await saveResp.json().catch(() => ({}));
+            if (!saveResp.ok || !saveResult.success) {
+                alert('Error saving files locally: ' + (saveResult.error || 'Unknown error'));
+                return;
+            }
+        } else {
+            // Regenerate selected parts sequentially
+            btnText.innerText = 'Regenerating...';
+            const edits = Array.from(document.querySelectorAll('.editor-group')).map(g => ({
+                part: g.dataset.part,
+                needsEdit: g.querySelector('.edit-check').checked,
+                spec: g.querySelector('.spec-input').value
+            })).filter(x => x.needsEdit);
+
+            for (const e of edits) {
+                try {
+                    const resp = await fetch('/api/regenerate-part', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ part: parseInt(e.part), spec: e.spec })
+                    });
+                    const json = await resp.json().catch(() => ({}));
+                    if (!resp.ok || !json.success) {
+                        alert('Regeneration failed for part ' + e.part + ': ' + (json.error || 'Unknown'));
+                    }
+                } catch (err) {
+                    console.error('Regenerate error:', err);
+                }
+            }
+
+            // Refresh preview PDF and audio sources
+            const pdfFrame = document.getElementById('pdf-frame');
+            pdfFrame.src = '/generate_pdf_preview?ts=' + Date.now();
+
+            // Refresh audio sources for parts that exist
+            for (let i = 1; i <= 4; i++) {
+                const audioEl = document.querySelector(`.editor-group[data-part='${i}'] .mini-player source`);
+                if (audioEl) {
+                    audioEl.src = `/get_audio/${i}?ts=${Date.now()}`;
+                    const player = audioEl.closest('.mini-player');
+                    if (player) player.style.display = 'none';
+                }
+            }
+        }
+
+        // Request the server to build a zip and return it
+        const response = await fetch('/api/download-files', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ files: selectedFiles })
         });
 
-        const result = await response.json();
-
-        if (result.success) {
-            alert("Successfully saved to Firebase!");
-            window.location.href = '/history';
-        } else {
-            alert("Error: " + (result.error || "Failed to save files."));
+        if (!response.ok) {
+            const err = await response.json().catch(() => ({}));
+            alert('Error: ' + (err.error || 'Failed to prepare download.'));
+            return;
         }
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        // use suggested filename from server
+        const filename = response.headers.get('Content-Disposition')?.split('filename=')?.pop() || `ielts_materials.zip`;
+        a.download = filename.replace(/"/g, '');
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        a.remove();
+
+        // If no edits selected, redirect back to question generator after download
+        if (!editsSelected) {
+            setTimeout(() => { window.location.href = '/question-generator'; }, 500);
+        }
+
     } catch (error) {
-        console.error("Save error:", error);
-        alert("A server error occurred.");
-    } finally {
-        // 3. Reset button state
-        saveBtn.disabled = false;
-        spinner.style.display = 'none';
-        btnText.innerText = 'Save';
-    }
+        console.error("Download error:", error);
+        alert("A server error occurred while preparing the download.");
+        } finally {
+            // 3. Reset button state
+            saveBtn.disabled = false;
+            spinner.style.display = 'none';
+            btnText.innerText = 'Save locally';
+        }
 }

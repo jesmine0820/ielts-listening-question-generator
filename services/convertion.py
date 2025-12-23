@@ -11,14 +11,14 @@ from fpdf import FPDF
 BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
 # Now define all paths starting from BASE_DIR
-TEMP_JSON = os.path.join(BASE_DIR, "model", "temp", "temp_generated_questions.json")
+TEMP_JSON = os.path.join(BASE_DIR, "static", "temp", "temp_generated_questions.json")
 DEJAVUSANS_FONT = os.path.join(BASE_DIR, "static", "fonts", "DejaVuSans.ttf")
 SPACEMONO_FONT = os.path.join(BASE_DIR, "static", "fonts", "SpaceMono-Regular.ttf")
 IELTS_LOGO = os.path.join(BASE_DIR, "static", "images", "ielts_logo.png")
 
 def get_set_folder():
    
-    base_folder = os.path.join(BASE_DIR, "model", "output")
+    base_folder = os.path.join(BASE_DIR, "static", "output")
     os.makedirs(base_folder, exist_ok=True)
 
     # Find existing set numbers
@@ -32,8 +32,8 @@ def get_set_folder():
     target_folder = os.path.join(base_folder, f"set{next_set_num}")
     os.makedirs(target_folder, exist_ok=True)
 
-    temp_folder = "model/temp"
-    
+    temp_folder = os.path.join(BASE_DIR, "static", "temp")
+
     return target_folder, next_set_num, temp_folder
 
 def get_key_and_sections():

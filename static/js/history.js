@@ -1,6 +1,14 @@
 document.addEventListener('DOMContentLoaded', async () => {
     const historyList = document.getElementById('history-list');
     const template = document.getElementById('history-card-template');
+    const previewModal = document.getElementById('preview-modal');
+    const previewIframe = document.getElementById('preview-iframe');
+    const previewClose = document.getElementById('preview-close');
+
+    previewClose.addEventListener('click', () => {
+        previewModal.style.display = 'none';
+        previewIframe.src = '';
+    });
 
     try {
         const response = await fetch('/api/get-history');
@@ -8,25 +16,50 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         if (result.success && result.history.length > 0) {
             historyList.innerHTML = ''; // Clear loader
-            
+
             result.history.forEach(item => {
                 const clone = template.content.cloneNode(true);
-                
-                // Parse set name and date
-                clone.querySelector('.set-name').innerText = item.folder_name.toUpperCase();
-                const [date, time] = item.timestamp.split(' ');
-                clone.querySelector('.set-date').innerText = `Date: ${date}`;
-                clone.querySelector('.set-time').innerText = `Time: ${time}`;
 
-                // Populate Dropdown
+                clone.querySelector('.set-name').innerText = item.folder_name.toUpperCase();
+                clone.querySelector('.set-date').innerText = `Date: ${item.timestamp.split(' ')[0]}`;
+                clone.querySelector('.set-time').innerText = `Time: ${item.timestamp.split(' ')[1] || ''}`;
+
                 const dropdown = clone.querySelector('.file-dropdown');
-                for (const [fileName, url] of Object.entries(item.files)) {
+                const previewBtn = clone.querySelector('.btn-preview');
+                const downloadBtn = clone.querySelector('.btn-download');
+
+                // Build options from files object
+                const files = item.files || {};
+                Object.entries(files).forEach(([key, url]) => {
                     const option = document.createElement('option');
                     option.value = url;
-                    // Replace underscore back to dot for display (Full_Set_pdf -> Full_Set.pdf)
-                    option.innerText = fileName.replace(/_([^_]*)$/, '.$1'); 
+                    // display-friendly name
+                    const display = key.replace(/_/g, '.');
+                    option.innerText = display;
                     dropdown.appendChild(option);
-                }
+                });
+
+                // Preview handler
+                previewBtn.addEventListener('click', () => {
+                    const url = dropdown.value;
+                    if (!url) { alert('Please select a file to preview.'); return; }
+                    previewIframe.src = url;
+                    previewModal.style.display = 'flex';
+                });
+
+                // Download handler
+                downloadBtn.addEventListener('click', () => {
+                    const url = dropdown.value;
+                    if (!url) { alert('Please select a file to download.'); return; }
+                    // Use anchor to trigger download/open in new tab
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.target = '_blank';
+                    a.rel = 'noopener';
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                });
 
                 historyList.appendChild(clone);
             });
@@ -42,15 +75,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     } catch (err) {
         historyList.innerHTML = '<p class="error">Failed to load history. Please try again later.</p>';
+        console.error('Failed to load history', err);
     }
 });
-
-function downloadSelectedFile(button) {
-    const select = button.previousElementSibling;
-    const url = select.value;
-    if (url) {
-        window.open(url, '_blank');
-    } else {
-        alert("Please select a file first.");
-    }
-}
