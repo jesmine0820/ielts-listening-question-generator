@@ -1,5 +1,5 @@
 # Data & Math (Crucial to keep numpy below 2.0 for Coqui/Tensorflow)
-numpy<2.0.0
+numpy
 pandas
 scikit-learn
 
