@@ -1,0 +1,167 @@
+                               IELTS Listening Test 
+                                        Set 4       
+                                   24 December 2025
+
+Part Part 1
+Complete the table below. Write ONE WORD AND / OR A NUMBER for each answer.
+
++-------------------+------------+--------------+-----------+-----------------------+---------------------+
+| Service Type      | Speed      | Monthly Cost | Contract  | Special Offer         | Contact Details     |
+|                   | (Mbps)     | (£)          | (months)  |                       |                     |
++-------------------+------------+--------------+-----------+-----------------------+---------------------+
+| Basic Home WiFi   | 20         | 25           | 12        | Free 1. ________      | 0800 123 4567       |
+| Family Plus       | 50         | 35           | 2. _______| 10% discount on 3. ____| services@wifi.com   |
+| Premium Unlimited | 100        | 45           | 24        | First 4. ________ free| support@wifi.com    |
+| Business Connect  | 5. _______ | 60           | 12        | Free 6. ________      | 0800 987 6543       |
+| Student Saver     | 30         | 7. _______   | 9         | No 8. ________ fee    | student@wifi.com    |
+| Gaming Superfast  | 500        | 80           | 9. _______| Free gaming 10. _____ | gaming@wifi.com     |
++-------------------+------------+--------------+-----------+-----------------------+---------------------+
+
+Answers: 
+1. Free ________. ________________
+2. Contract ________. ________________
+3. 10% discount on ________. ________________
+4. First ________ free. ________________
+5. Speed ________. ________________
+6. Free ________. ________________
+7. Monthly Cost ________. ________________
+8. No ________ fee. ________________
+9. Contract ________. ________________
+10. Free gaming ________. ________________
+
+ -------------------------------------------------------------------------------------------------
+Part Part 2
+Label the map below.
+Write the correct letter, A-J.
+
++-----------------------------------------------------------------------+
+|                                                                       |
+|   J. Staff Offices                                                    |
+|                                                                       |
+| +-----------------+ +-----------------+ +-----------------+           |
+| |                 | |                 | |                 |           |
+| |   F. Learning   | | G. Private      | | H. Tech Support |           |
+| |     Zone        | |   Consultation  | |     Desk        |           |
+| |                 | |                 | |                 |           |
+| +-----------------+ +-----------------+ +-----------------+           |
+|                                                                       |
+|                                 I. Main Corridor                      |
+|                                                                       |
+| +-----------------+                         +-----------------+       |
+| |                 |                         |                 |       |
+| |   D. Self-Service                       E. Digital Tools    |       |
+| |     Kiosks      |                         |   Showcase      |       |
+| |                 |                         |                 |       |
+| +-----------------+                         +-----------------+       |
+|                                                                       |
+| +-----------------+                         +-----------------+       |
+| |                 |                         |                 |       |
+| |   A. Welcome    |                         |   C. Waiting    |       |
+| |     Desk        |                         |     Area        |       |
+| |                 |                         |                 |       |
+| +-----------------+                         +-----------------+       |
+|                                                                       |
+|                        B. Entrance                                    |
++-----------------------------------------------------------------------+
+
+Answers: 
+11. Entrance. ________________
+12. Welcome Desk. ________________
+13. Waiting Area. ________________
+14. Self-Service Kiosks. ________________
+15. Digital Tools Showcase. ________________
+16. Learning Zone. ________________
+17. Private Consultation Pods. ________________
+18. Tech Support Desk. ________________
+19. Main Corridor. ________________
+20. Staff Offices. ________________
+
+ -------------------------------------------------------------------------------------------------
+Part Part 3
+Complete the flow chart below.
+
+STUDENT SOFTWARE TRAINING PROJECT: STAGES AND REQUIREMENTS
+-----------------------------------------------------------------------
+START
+   |
+   V
+1. Initial Briefing (Understand project scope & objectives)
+   |
+   V
+2. Software Selection & Planning
+   - Research suitable tools based on (Q21)
+   - Develop a project timeline
+   |
+   V
+3. Data Collection & Analysis
+   - Gather necessary information
+   - Perform initial data processing with (Q22) in mind
+   |
+   V
+4. Software Development
+   - Design architecture
+   - Write code/configure software, focusing on (Q23)
+   |
+   V
+5. Testing Phase
+   - Conduct unit tests
+   - Implement user acceptance testing to identify (Q24)
+   |
+   V
+6. Peer Review & Feedback
+   - Present work to colleagues
+   - Receive constructive criticism on (Q25)
+   |
+   V
+7. Refinement & Documentation
+   - Integrate feedback
+   - Produce user manual/technical document following (Q26)
+   |
+   V
+8. Final Submission Preparation
+   - Check all deliverables
+   - Ensure the (Q27) is complete
+   |
+   V
+9. Project (Q28)
+   - Demonstrate software functionality
+   - Answer questions
+   |
+   V
+10. Assessment and Reflection
+    - Tutor evaluation based on set (Q29)
+    - Reflect on overall (Q30)
+   |
+   V
+END
+-----------------------------------------------------------------------
+
+Answers: 
+21. ________________
+22. ________________
+23. ________________
+24. ________________
+25. ________________
+26. ________________
+27. ________________
+28. ________________
+29. ________________
+30. ________________
+
+ -------------------------------------------------------------------------------------------------
+Part Part 4
+Complete the sentences below. Write NO MORE THAN TWO WORDS for each answer.
+
+31. Early mobile phone plans primarily focused on providing reliable ______.
+32. To attract customers, many early plans offered ______ to cover the initial device cost.
+33. For a significant period, the mobile industry commonly used ______ to regulate data consumption.
+34. A paramount factor for consumers when choosing a plan today is reliable ______.
+35. The rise of ______ plans allows users to buy their phone separately from the service.
+36. Many modern plans aim to alleviate "data anxiety" by offering ______ plans.
+37. Future mobile phone plans are expected to offer more ______ to suit individual user needs.
+38. Providers are now encouraging customers to ______ to promote environmental sustainability.
+39. Regulatory measures are often introduced to prevent "bill shock" from ______.
+40. The constant evolution of mobile plans reflects broader technological advancement and changing ______.
+
+ -------------------------------------------------------------------------------------------------
+                               End of Paper

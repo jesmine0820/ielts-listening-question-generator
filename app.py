@@ -16,7 +16,8 @@ from flask_bcrypt import Bcrypt
 
 # Initialize App
 app = Flask(__name__)
-app.secret_key = os.getenv("FLASK_SECRET_KEY")
+app.secret_key = os.getenv("FLASK_SECRET_KEY") # Render use
+# app.secret_key = "ielts_listening_question_generator"
 bcrypt = Bcrypt(app)
 CORS(app)
 
