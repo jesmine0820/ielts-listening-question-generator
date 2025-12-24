@@ -25,6 +25,7 @@ pillow
 flask
 flask-cors
 flask-bcrypt
+gunicorn
 
 # Database & Auth
 firebase-admin
