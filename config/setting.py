@@ -3,7 +3,7 @@ import google.generativeai as genai
 
 from TTS.api import TTS
 
-API_KEY = os.getenv("API_KEY")
+API_KEY = os.getenv("API_KEY2")
 GMAIL_PASSWORD = os.getenv("GMAIL_PASSWORD")
 
 # Configure API key
